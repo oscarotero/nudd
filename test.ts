@@ -1,5 +1,5 @@
 import { udd, UddOptions, UddResult } from "./mod.ts";
-import { RegistryCtor } from "./registry.ts";
+import { RegistryCtor } from "./registry/utils.ts";
 import { assertEquals, FakeDenoLand, FakeRegistry } from "./test_deps.ts";
 
 async function testUdd(

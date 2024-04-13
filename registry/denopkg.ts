@@ -7,6 +7,8 @@ import {
 import { githubReleases } from "./github.ts";
 
 export class Denopkg extends RegistryUrl {
+  static regexp = /https?:\/\/denopkg.com\/[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
+
   get version(): string {
     return defaultVersion(this);
   }
@@ -17,8 +19,6 @@ export class Denopkg extends RegistryUrl {
 
     return `${owner}/${name}`;
   }
-
-  regexp = /https?:\/\/denopkg.com\/[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
 
   async all(): Promise<string[]> {
     const [owner, name] = this.name.split("/");

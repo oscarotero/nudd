@@ -9,6 +9,9 @@ import {
 import { unpkgVersions } from "./unpkg.ts";
 
 export class PikaScope extends RegistryUrl {
+  static regexp =
+    /https?:\/\/cdn\.pika\.dev(\/\_)?\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
+
   get version(): string {
     return defaultInfo(this).version;
   }
@@ -17,9 +20,6 @@ export class PikaScope extends RegistryUrl {
     const { scope, packageName } = defaultInfo(this);
     return `${scope}/${packageName}`;
   }
-
-  regexp =
-    /https?:\/\/cdn\.pika\.dev(\/\_)?\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
 
   async all(): Promise<string[]> {
     return await unpkgVersions(this.name);
@@ -32,6 +32,8 @@ export class PikaScope extends RegistryUrl {
 }
 
 export class Pika extends RegistryUrl {
+  static regexp = /https?:\/\/cdn.pika.dev(\/\_)?\/[^\/\"\']*?\@[^\'\"]*/;
+
   get version(): string {
     return defaultVersion(this);
   }
@@ -39,8 +41,6 @@ export class Pika extends RegistryUrl {
   get name(): string {
     return defaultName(this);
   }
-
-  regexp = /https?:\/\/cdn.pika.dev(\/\_)?\/[^\/\"\']*?\@[^\'\"]*/;
 
   async all(): Promise<string[]> {
     return await unpkgVersions(this.name);

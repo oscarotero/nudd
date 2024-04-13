@@ -2,6 +2,9 @@ import { RegistryUrl } from "./utils.ts";
 import { GithubRaw, githubReleases } from "./github.ts";
 
 export class JsDelivr extends RegistryUrl {
+  static regexp =
+    /https?:\/\/cdn\.jsdelivr\.net\/gh\/[^\/\"\']+\/[^\/\"\']+@(?!master)[^\/\"\']+\/[^\'\"]*/;
+
   get version(): string {
     const { version } = this.parts();
     if (version === undefined) {
@@ -14,9 +17,6 @@ export class JsDelivr extends RegistryUrl {
     const { user, repo } = this.parts();
     return `${user}/${repo}`;
   }
-
-  regexp =
-    /https?:\/\/cdn\.jsdelivr\.net\/gh\/[^\/\"\']+\/[^\/\"\']+@(?!master)[^\/\"\']+\/[^\'\"]*/;
 
   parts(): { parts: string[]; repo: string; user: string; version: string } {
     const parts = this.url.split("/");

@@ -8,6 +8,9 @@ import {
 const DL_CACHE: Map<string, string[]> = new Map<string, string[]>();
 
 export class DenoLand extends RegistryUrl {
+  static regexp =
+    /https?:\/\/deno.land\/(?:std\@[^\'\"]*|x\/[^\/\"\']*?\@[^\'\"]*)/;
+
   get version(): string {
     return defaultVersion(this);
   }
@@ -19,8 +22,6 @@ export class DenoLand extends RegistryUrl {
 
     return stdGroup ?? xGroup;
   }
-
-  regexp = /https?:\/\/deno.land\/(?:std\@[^\'\"]*|x\/[^\/\"\']*?\@[^\'\"]*)/;
 
   async all(): Promise<string[]> {
     const name = this.name;

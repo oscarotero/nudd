@@ -9,6 +9,9 @@ import {
 import { unpkgVersions } from "./unpkg.ts";
 
 export class SkypackScope extends RegistryUrl {
+  static regexp =
+    /https?:\/\/cdn\.skypack\.dev(\/\_)?\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
+
   get version(): string {
     return defaultInfo(this).version;
   }
@@ -17,9 +20,6 @@ export class SkypackScope extends RegistryUrl {
     const { scope, packageName } = defaultInfo(this);
     return `${scope}/${packageName}`;
   }
-
-  regexp =
-    /https?:\/\/cdn\.skypack\.dev(\/\_)?\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
 
   async all(): Promise<string[]> {
     return await unpkgVersions(this.name);
@@ -32,6 +32,8 @@ export class SkypackScope extends RegistryUrl {
 }
 
 export class Skypack extends RegistryUrl {
+  static regexp = /https?:\/\/cdn.skypack.dev(\/\_)?\/[^\/\"\']*?\@[^\'\"]*/;
+
   get version(): string {
     return defaultVersion(this);
   }
@@ -39,8 +41,6 @@ export class Skypack extends RegistryUrl {
   get name(): string {
     return defaultName(this);
   }
-
-  regexp = /https?:\/\/cdn.skypack.dev(\/\_)?\/[^\/\"\']*?\@[^\'\"]*/;
 
   async all(): Promise<string[]> {
     return await unpkgVersions(this.name);

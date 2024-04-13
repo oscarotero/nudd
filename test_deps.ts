@@ -1,5 +1,5 @@
-import { defaultAt, defaultVersion, RegistryUrl } from "./registry.ts";
-import { DenoLand } from "./registry.ts";
+import { defaultAt, defaultVersion, RegistryUrl } from "./registry/utils.ts";
+import { DenoLand } from "./registry/denoland.ts";
 
 export {
   assert,
@@ -25,8 +25,12 @@ export class FakeRegistry implements RegistryUrl {
     return new FakeRegistry(url);
   }
 
-  version(): string {
+  get version(): string {
     return defaultVersion(this);
+  }
+
+  get name(): string {
+    return this.url.split("/")[3];
   }
 
   regexp = /https?:\/\/fakeregistry.com\/[^\/\"\']*?\@[^\'\"]*/;

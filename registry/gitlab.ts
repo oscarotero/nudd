@@ -46,6 +46,9 @@ async function gitlabReleases(
 }
 
 export class GitlabRaw extends RegistryUrl {
+  static regexp =
+    /https?:\/\/gitlab\.com\/[^\/\"\']+\/[^\/\"\']+\/-\/raw\/(?!master)[^\/\"\']+\/[^\'\"]*/;
+
   get version(): string {
     const v = this.url.split("/")[7];
     if (v === undefined) {
@@ -58,9 +61,6 @@ export class GitlabRaw extends RegistryUrl {
     const [, , , user, repo] = this.url.split("/");
     return `${user}/${repo}`;
   }
-
-  regexp =
-    /https?:\/\/gitlab\.com\/[^\/\"\']+\/[^\/\"\']+\/-\/raw\/(?!master)[^\/\"\']+\/[^\'\"]*/;
 
   all(): Promise<string[]> {
     const [user, repo] = this.name.split("/");

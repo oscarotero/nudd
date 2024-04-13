@@ -12,7 +12,7 @@ export function importUrls(
   registries: RegistryCtor[],
 ): string[] {
   // look up all the supported regex matches.
-  const rs: RegExp[] = registries.map((R) => new R("").regexp).map((re) =>
+  const rs: RegExp[] = registries.map((R) => R.regexp).map((re) =>
     new RegExp(re, "g")
   );
   return rs.flatMap((regexp) => tsContent.match(regexp) || []);

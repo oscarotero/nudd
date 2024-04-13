@@ -9,6 +9,8 @@ import {
 import { unpkgVersions } from "./unpkg.ts";
 
 export class EsmShScope extends RegistryUrl {
+  static regexp = /https?:\/\/esm\.sh\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
+
   get version(): string {
     return defaultInfo(this).version;
   }
@@ -17,8 +19,6 @@ export class EsmShScope extends RegistryUrl {
     const { scope, packageName } = defaultInfo(this);
     return `${scope}/${packageName}`;
   }
-
-  regexp = /https?:\/\/esm\.sh\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
 
   async all(): Promise<string[]> {
     return await unpkgVersions(this.name);
@@ -30,8 +30,8 @@ export class EsmShScope extends RegistryUrl {
   }
 }
 
-export class EsmSh implements RegistryUrl {
-  url: string;
+export class EsmSh extends RegistryUrl {
+  static regexp = /https?:\/\/esm.sh\/[^\/\"\']*?\@[^\'\"]*/;
 
   get version(): string {
     return defaultVersion(this);
@@ -39,12 +39,6 @@ export class EsmSh implements RegistryUrl {
 
   get name(): string {
     return defaultName(this);
-  }
-
-  regexp = /https?:\/\/esm.sh\/[^\/\"\']*?\@[^\'\"]*/;
-
-  constructor(url: string) {
-    this.url = url;
   }
 
   async all(): Promise<string[]> {

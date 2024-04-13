@@ -1,6 +1,9 @@
 import { RegistryUrl } from "./utils.ts";
 
 export class GithubRaw extends RegistryUrl {
+  static regexp =
+    /https?:\/\/raw\.githubusercontent\.com\/[^\/\"\']+\/[^\/\"\']+\/(?!master)[^\/\"\']+\/[^\'\"]*/;
+
   get version(): string {
     const v = this.url.split("/")[5];
     if (v === undefined) {
@@ -13,9 +16,6 @@ export class GithubRaw extends RegistryUrl {
     const [, , , user, repo] = this.url.split("/");
     return `${user}/${repo}`;
   }
-
-  regexp =
-    /https?:\/\/raw\.githubusercontent\.com\/[^\/\"\']+\/[^\/\"\']+\/(?!master)[^\/\"\']+\/[^\'\"]*/;
 
   all(): Promise<string[]> {
     const [user, repo] = this.name.split("/");

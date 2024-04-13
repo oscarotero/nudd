@@ -4,6 +4,8 @@ const NPM_CACHE: Map<string, string[]> = new Map<string, string[]>();
 const parseRegex = /^npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^/]+))?(.*)/;
 
 export class Npm extends RegistryUrl {
+  static regexp = /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^\/\"\']+))?[^\'\"]/;
+
   get version(): string {
     const [, _, version] = this.url.match(parseRegex)!;
     if (version === null) {
@@ -16,8 +18,6 @@ export class Npm extends RegistryUrl {
     const [, name] = this.url.match(parseRegex)!;
     return name;
   }
-
-  regexp = /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^\/\"\']+))?[^\'\"]/;
 
   async all(): Promise<string[]> {
     const name = this.name;

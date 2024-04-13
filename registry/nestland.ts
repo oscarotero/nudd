@@ -27,6 +27,9 @@ async function nestlandReleases(
 }
 
 export class NestLand extends RegistryUrl {
+  static regexp =
+    /https?:\/\/x\.nest\.land\/[^\/\"\']+@(?!master)[^\/\"\']+\/[^\'\"]*/;
+
   get version(): string {
     return defaultVersion(this);
   }
@@ -34,9 +37,6 @@ export class NestLand extends RegistryUrl {
   get name(): string {
     return this.url.split("/")[3].split("@")[0];
   }
-
-  regexp =
-    /https?:\/\/x\.nest\.land\/[^\/\"\']+@(?!master)[^\/\"\']+\/[^\'\"]*/;
 
   all(): Promise<string[]> {
     return nestlandReleases(this.name);

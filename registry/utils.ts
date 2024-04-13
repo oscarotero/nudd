@@ -2,9 +2,6 @@ export abstract class RegistryUrl {
   /** The module URL */
   url: string;
 
-  /** A valid regexp for this RegistryUrl */
-  abstract regexp: RegExp;
-
   /** The package version */
   abstract version: string;
 
@@ -34,14 +31,17 @@ export interface PackageInfo {
   version: string;
 }
 
-export type RegistryCtor = new (url: string) => RegistryUrl;
+export interface RegistryCtor {
+  new (url: string): RegistryUrl;
+  regexp: RegExp;
+}
+
 export function lookup(url: string, registries: RegistryCtor[]):
   | RegistryUrl
   | undefined {
   for (const R of registries) {
-    const u = new R(url);
-    if (u.regexp.test(url)) {
-      return u;
+    if (R.regexp.test(url)) {
+      return new R(url);
     }
   }
 }

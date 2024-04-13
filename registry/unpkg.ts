@@ -8,6 +8,8 @@ import {
 } from "./utils.ts";
 
 export class UnpkgScope extends RegistryUrl {
+  static regexp = /https?:\/\/unpkg\.com\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
+
   get version(): string {
     return defaultInfo(this).version;
   }
@@ -16,8 +18,6 @@ export class UnpkgScope extends RegistryUrl {
     const { scope, packageName } = defaultInfo(this);
     return `${scope}/${packageName}`;
   }
-
-  regexp = /https?:\/\/unpkg\.com\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
 
   async all(): Promise<string[]> {
     return await unpkgVersions(this.name);
@@ -30,6 +30,8 @@ export class UnpkgScope extends RegistryUrl {
 }
 
 export class Unpkg extends RegistryUrl {
+  static regexp = /https?:\/\/unpkg.com\/[^\/\"\']*?\@[^\'\"]*/;
+
   get version(): string {
     return defaultVersion(this);
   }
@@ -37,8 +39,6 @@ export class Unpkg extends RegistryUrl {
   get name(): string {
     return defaultName(this);
   }
-
-  regexp = /https?:\/\/unpkg.com\/[^\/\"\']*?\@[^\'\"]*/;
 
   async all(): Promise<string[]> {
     return await unpkgVersions(this.name);
