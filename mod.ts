@@ -2,7 +2,44 @@ import { colors } from "./deps.ts";
 import { Progress, SilentProgress } from "./progress.ts";
 import { importUrls } from "./search.ts";
 import { fragment, Semver, semver } from "./semver.ts";
-import { lookup, REGISTRIES, RegistryCtor, RegistryUrl } from "./registry.ts";
+import {
+  lookup,
+  type RegistryCtor,
+  type RegistryUrl,
+} from "./registry/utils.ts";
+import { DenoLand } from "./registry/denoland.ts";
+import { JsDelivr } from "./registry/jsdelivr.ts";
+import { Npm } from "./registry/npm.ts";
+import { GithubRaw } from "./registry/github.ts";
+import { GitlabRaw } from "./registry/gitlab.ts";
+import { Unpkg, UnpkgScope } from "./registry/unpkg.ts";
+import { Skypack, SkypackScope } from "./registry/skypack.ts";
+import { EsmSh, EsmShScope } from "./registry/esm.ts";
+import { Pika, PikaScope } from "./registry/pika.ts";
+import { NestLand } from "./registry/nestland.ts";
+import { Jspm } from "./registry/jspm.ts";
+import { Denopkg } from "./registry/denopkg.ts";
+import { PaxDeno } from "./registry/paxdeno.ts";
+
+const REGISTRIES = [
+  DenoLand,
+  UnpkgScope,
+  Unpkg,
+  Denopkg,
+  PaxDeno,
+  Jspm,
+  PikaScope,
+  Pika,
+  SkypackScope,
+  Skypack,
+  EsmShScope,
+  EsmSh,
+  GithubRaw,
+  GitlabRaw,
+  JsDelivr,
+  NestLand,
+  Npm,
+];
 
 // FIXME we should catch ctrl-c etc. and write back the original deps.ts
 

@@ -2,7 +2,7 @@
 
 import { colors, expandGlob, parseArgs } from "./deps.ts";
 import { udd, UddOptions, UddResult } from "./mod.ts";
-import { DenoLand } from "./registry.ts";
+import { DenoLand } from "./registry/denoland.ts";
 
 function testsThunk(tests: string[]): () => Promise<void> {
   return async () => {
