@@ -46,8 +46,24 @@ async function gitlabReleases(
 }
 
 export class GitlabRaw extends RegistryUrl {
-  all(): Promise<string[]> {
+  get version(): string {
+    const v = this.url.split("/")[7];
+    if (v === undefined) {
+      throw Error(`Unable to find version in ${this.url}`);
+    }
+    return v;
+  }
+
+  get name(): string {
     const [, , , user, repo] = this.url.split("/");
+    return `${user}/${repo}`;
+  }
+
+  regexp =
+    /https?:\/\/gitlab\.com\/[^\/\"\']+\/[^\/\"\']+\/-\/raw\/(?!master)[^\/\"\']+\/[^\'\"]*/;
+
+  all(): Promise<string[]> {
+    const [user, repo] = this.name.split("/");
     return gitlabReleases(user, repo);
   }
 
@@ -56,15 +72,4 @@ export class GitlabRaw extends RegistryUrl {
     parts[7] = version;
     return new GithubRaw(parts.join("/"));
   }
-
-  version(): string {
-    const v = this.url.split("/")[7];
-    if (v === undefined) {
-      throw Error(`Unable to find version in ${this.url}`);
-    }
-    return v;
-  }
-
-  regexp =
-    /https?:\/\/gitlab\.com\/[^\/\"\']+\/[^\/\"\']+\/-\/raw\/(?!master)[^\/\"\']+\/[^\'\"]*/;
 }

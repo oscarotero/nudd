@@ -50,7 +50,7 @@ function version() {
   // FIXME this might be kinda a hacky way to do it...
   const u = new DenoLand(import.meta.url);
   try {
-    console.log(u.version());
+    console.log(u.version);
   } catch (e) {
     console.error(e);
   }

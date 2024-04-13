@@ -9,37 +9,45 @@ import {
 import { unpkgVersions } from "./unpkg.ts";
 
 export class SkypackScope extends RegistryUrl {
-  async all(): Promise<string[]> {
+  get version(): string {
+    return defaultInfo(this).version;
+  }
+
+  get name(): string {
     const { scope, packageName } = defaultInfo(this);
-    return await unpkgVersions(`${scope}/${packageName}`);
+    return `${scope}/${packageName}`;
+  }
+
+  regexp =
+    /https?:\/\/cdn\.skypack\.dev(\/\_)?\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
+
+  async all(): Promise<string[]> {
+    return await unpkgVersions(this.name);
   }
 
   at(version: string): RegistryUrl {
     const url = defaultScopeAt(this, version);
     return new SkypackScope(url);
   }
-
-  version(): string {
-    return defaultInfo(this).version;
-  }
-
-  regexp =
-    /https?:\/\/cdn\.skypack\.dev(\/\_)?\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
 }
 
 export class Skypack extends RegistryUrl {
+  get version(): string {
+    return defaultVersion(this);
+  }
+
+  get name(): string {
+    return defaultName(this);
+  }
+
+  regexp = /https?:\/\/cdn.skypack.dev(\/\_)?\/[^\/\"\']*?\@[^\'\"]*/;
+
   async all(): Promise<string[]> {
-    return await unpkgVersions(defaultName(this));
+    return await unpkgVersions(this.name);
   }
 
   at(version: string): RegistryUrl {
     const url = defaultAt(this, version);
     return new Skypack(url);
   }
-
-  version(): string {
-    return defaultVersion(this);
-  }
-
-  regexp = /https?:\/\/cdn.skypack.dev(\/\_)?\/[^\/\"\']*?\@[^\'\"]*/;
 }

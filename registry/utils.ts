@@ -1,5 +1,15 @@
 export abstract class RegistryUrl {
+  /** The module URL */
   url: string;
+
+  /** A valid regexp for this RegistryUrl */
+  abstract regexp: RegExp;
+
+  /** The package version */
+  abstract version: string;
+
+  /** The package name */
+  abstract name: string;
 
   constructor(url: string) {
     this.url = url;
@@ -10,12 +20,6 @@ export abstract class RegistryUrl {
 
   /** Returns a new instance with a specific version */
   abstract at(version: string): RegistryUrl;
-
-  /** Returns the package version */
-  abstract version(): string;
-
-  /** A valid regexp for this RegistryUrl */
-  abstract regexp: RegExp;
 }
 
 export interface VersionsJson {

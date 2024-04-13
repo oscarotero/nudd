@@ -8,12 +8,23 @@ import {
 const DL_CACHE: Map<string, string[]> = new Map<string, string[]>();
 
 export class DenoLand extends RegistryUrl {
-  async all(): Promise<string[]> {
+  get version(): string {
+    return defaultVersion(this);
+  }
+
+  get name(): string {
     const [, stdGroup, xGroup] = this.url.match(
       /deno\.land\/(?:(std)|x\/([^/@]*))/,
     )!;
 
-    const name = stdGroup ?? xGroup;
+    return stdGroup ?? xGroup;
+  }
+
+  regexp = /https?:\/\/deno.land\/(?:std\@[^\'\"]*|x\/[^\/\"\']*?\@[^\'\"]*)/;
+
+  async all(): Promise<string[]> {
+    const name = this.name;
+
     if (DL_CACHE.has(name)) {
       return DL_CACHE.get(name)!;
     }
@@ -39,10 +50,4 @@ export class DenoLand extends RegistryUrl {
     const url = defaultAt(this, version);
     return new DenoLand(url);
   }
-
-  version(): string {
-    return defaultVersion(this);
-  }
-
-  regexp = /https?:\/\/deno.land\/(?:std\@[^\'\"]*|x\/[^\/\"\']*?\@[^\'\"]*)/;
 }

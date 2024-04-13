@@ -2,6 +2,22 @@ import { RegistryUrl } from "./utils.ts";
 import { GithubRaw, githubReleases } from "./github.ts";
 
 export class JsDelivr extends RegistryUrl {
+  get version(): string {
+    const { version } = this.parts();
+    if (version === undefined) {
+      throw Error(`Unable to find version in ${this.url}`);
+    }
+    return version;
+  }
+
+  get name(): string {
+    const { user, repo } = this.parts();
+    return `${user}/${repo}`;
+  }
+
+  regexp =
+    /https?:\/\/cdn\.jsdelivr\.net\/gh\/[^\/\"\']+\/[^\/\"\']+@(?!master)[^\/\"\']+\/[^\'\"]*/;
+
   parts(): { parts: string[]; repo: string; user: string; version: string } {
     const parts = this.url.split("/");
     const [repo, version] = parts[5].split("@");
@@ -14,7 +30,7 @@ export class JsDelivr extends RegistryUrl {
   }
 
   all(): Promise<string[]> {
-    const { user, repo } = this.parts();
+    const [user, repo] = this.name.split("/");
     return githubReleases(user, repo);
   }
 
@@ -23,15 +39,4 @@ export class JsDelivr extends RegistryUrl {
     parts[5] = `${repo}@${version}`;
     return new GithubRaw(parts.join("/"));
   }
-
-  version(): string {
-    const { version } = this.parts();
-    if (version === undefined) {
-      throw Error(`Unable to find version in ${this.url}`);
-    }
-    return version;
-  }
-
-  regexp =
-    /https?:\/\/cdn\.jsdelivr\.net\/gh\/[^\/\"\']+\/[^\/\"\']+@(?!master)[^\/\"\']+\/[^\'\"]*/;
 }

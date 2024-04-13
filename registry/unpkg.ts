@@ -8,38 +8,46 @@ import {
 } from "./utils.ts";
 
 export class UnpkgScope extends RegistryUrl {
-  async all(): Promise<string[]> {
+  get version(): string {
+    return defaultInfo(this).version;
+  }
+
+  get name(): string {
     const { scope, packageName } = defaultInfo(this);
-    return await unpkgVersions(`${scope}/${packageName}`);
+    return `${scope}/${packageName}`;
+  }
+
+  regexp = /https?:\/\/unpkg\.com\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
+
+  async all(): Promise<string[]> {
+    return await unpkgVersions(this.name);
   }
 
   at(version: string): RegistryUrl {
     const url = defaultScopeAt(this, version);
     return new UnpkgScope(url);
   }
-
-  version(): string {
-    return defaultInfo(this).version;
-  }
-
-  regexp = /https?:\/\/unpkg\.com\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
 }
 
 export class Unpkg extends RegistryUrl {
+  get version(): string {
+    return defaultVersion(this);
+  }
+
+  get name(): string {
+    return defaultName(this);
+  }
+
+  regexp = /https?:\/\/unpkg.com\/[^\/\"\']*?\@[^\'\"]*/;
+
   async all(): Promise<string[]> {
-    return await unpkgVersions(defaultName(this));
+    return await unpkgVersions(this.name);
   }
 
   at(version: string): RegistryUrl {
     const url = defaultAt(this, version);
     return new Unpkg(url);
   }
-
-  version(): string {
-    return defaultVersion(this);
-  }
-
-  regexp = /https?:\/\/unpkg.com\/[^\/\"\']*?\@[^\'\"]*/;
 }
 
 export async function unpkgVersions(name: string): Promise<string[]> {

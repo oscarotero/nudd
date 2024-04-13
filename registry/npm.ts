@@ -4,8 +4,23 @@ const NPM_CACHE: Map<string, string[]> = new Map<string, string[]>();
 const parseRegex = /^npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^/]+))?(.*)/;
 
 export class Npm extends RegistryUrl {
-  async all(): Promise<string[]> {
+  get version(): string {
+    const [, _, version] = this.url.match(parseRegex)!;
+    if (version === null) {
+      throw Error(`Unable to find version in ${this.url}`);
+    }
+    return version;
+  }
+
+  get name(): string {
     const [, name] = this.url.match(parseRegex)!;
+    return name;
+  }
+
+  regexp = /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^\/\"\']+))?[^\'\"]/;
+
+  async all(): Promise<string[]> {
+    const name = this.name;
 
     if (NPM_CACHE.has(name)) {
       return NPM_CACHE.get(name)!;
@@ -34,14 +49,4 @@ export class Npm extends RegistryUrl {
     const url = `npm:${name}@${version}${files}`;
     return new Npm(url);
   }
-
-  version(): string {
-    const [, _, version] = this.url.match(parseRegex)!;
-    if (version === null) {
-      throw Error(`Unable to find version in ${this.url}`);
-    }
-    return version;
-  }
-
-  regexp = /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^\/\"\']+))?[^\'\"]/;
 }

@@ -115,7 +115,7 @@ export class Udd {
     url: RegistryUrl,
   ): Promise<UddResult> {
     const initUrl: string = url.url;
-    const initVersion: string = url.version();
+    const initVersion: string = url.version;
     let newFragmentToken: string | undefined = undefined;
     await this.progress.log(`Looking for releases: ${url.url}`);
     const versions = await url.all();
@@ -131,7 +131,7 @@ export class Udd {
     }
 
     try {
-      new Semver(url.version());
+      new Semver(url.version);
     } catch (_) {
       // The version string is a non-semver string like a branch name.
       await this.progress.log(`Skip updating: ${url.url}`);
@@ -141,7 +141,7 @@ export class Udd {
     // if we pass a fragment with semver
     let filter: ((other: Semver) => boolean) | undefined = undefined;
     try {
-      filter = fragment(url.url, url.version());
+      filter = fragment(url.url, url.version);
     } catch (e) {
       if (e instanceof SyntaxError) {
         return {
@@ -155,7 +155,7 @@ export class Udd {
       }
     }
 
-    // potentially we can shortcut if fragment is #=${url.version()}...
+    // potentially we can shortcut if fragment is #=${url.version}...
     if (filter !== undefined) {
       const compatible: string[] = versions.map(semver).filter((x) =>
         x !== undefined
@@ -171,7 +171,7 @@ export class Udd {
       newVersion = compatible[0];
     }
 
-    if (url.version() === newVersion && newFragmentToken === undefined) {
+    if (url.version === newVersion && newFragmentToken === undefined) {
       await this.progress.log(`Using latest: ${url.url}`);
       return { initUrl, initVersion };
     }

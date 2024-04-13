@@ -1,8 +1,24 @@
 import { RegistryUrl } from "./utils.ts";
 
 export class GithubRaw extends RegistryUrl {
-  all(): Promise<string[]> {
+  get version(): string {
+    const v = this.url.split("/")[5];
+    if (v === undefined) {
+      throw Error(`Unable to find version in ${this.url}`);
+    }
+    return v;
+  }
+
+  get name(): string {
     const [, , , user, repo] = this.url.split("/");
+    return `${user}/${repo}`;
+  }
+
+  regexp =
+    /https?:\/\/raw\.githubusercontent\.com\/[^\/\"\']+\/[^\/\"\']+\/(?!master)[^\/\"\']+\/[^\'\"]*/;
+
+  all(): Promise<string[]> {
+    const [user, repo] = this.name.split("/");
     return githubReleases(user, repo);
   }
 
@@ -11,17 +27,6 @@ export class GithubRaw extends RegistryUrl {
     parts[5] = version;
     return new GithubRaw(parts.join("/"));
   }
-
-  version(): string {
-    const v = this.url.split("/")[5];
-    if (v === undefined) {
-      throw Error(`Unable to find version in ${this.url}`);
-    }
-    return v;
-  }
-
-  regexp =
-    /https?:\/\/raw\.githubusercontent\.com\/[^\/\"\']+\/[^\/\"\']+\/(?!master)[^\/\"\']+\/[^\'\"]*/;
 }
 
 export async function githubDownloadReleases(

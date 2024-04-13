@@ -7,19 +7,26 @@ import {
 import { githubReleases } from "./github.ts";
 
 export class PaxDeno extends RegistryUrl {
-  async all(): Promise<string[]> {
+  get version(): string {
+    return defaultVersion(this);
+  }
+
+  get name(): string {
     const owner = this.url.split("/")[3];
-    return await githubReleases(owner, defaultName(this));
+    const name = defaultName(this);
+
+    return `${owner}/${name}`;
+  }
+
+  regexp = /https?:\/\/pax.deno.dev\/[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
+
+  async all(): Promise<string[]> {
+    const [owner, name] = this.name.split("/");
+    return await githubReleases(owner, name);
   }
 
   at(version: string): RegistryUrl {
     const url = defaultAt(this, version);
     return new PaxDeno(url);
   }
-
-  version(): string {
-    return defaultVersion(this);
-  }
-
-  regexp = /https?:\/\/pax.deno.dev\/[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
 }
