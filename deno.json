@@ -2,5 +2,8 @@
   "lock": false,
   "tasks": {
     "test": "deno test --allow-run --allow-read --allow-write tests/test.ts"
+  },
+  "fmt": {
+    "exclude": ["CHANGELOG.md"]
   }
 }
