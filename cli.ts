@@ -1,13 +1,13 @@
 // deno -A main.ts deps.ts --test="deno test"
 
 import { colors, expandGlob, parseArgs, Spinner } from "./deps.ts";
-import { udd, UddOptions, UddResult } from "./mod.ts";
+import { up, UpOptions, UpResult } from "./mod.ts";
 import { DenoLand } from "./registry/denoland.ts";
 
 function help() {
-  console.log(`usage: udd [-h] [--dry-run] [--test TEST] file [file ...]
+  console.log(`usage: up [-h] [--dry-run] [--test TEST] file [file ...]
 
-udd: Update Deno Dependencies
+up: Update Deno Dependencies
 
 Positional arguments:
   file      \tfiles to update dependencies
@@ -15,8 +15,8 @@ Positional arguments:
 Optional arguments:
  -h, --help \tshow this help text
  --dry-run  \ttest what dependencies can be updated
- --upgrade  \tupdate udd to the latest version
- --version  \tprint the version of udd`);
+ --upgrade  \tupdate up to the latest version
+ --version  \tprint the version of up`);
 }
 
 function version() {
@@ -30,7 +30,7 @@ function version() {
 }
 
 async function upgrade() {
-  const u = new DenoLand("https://deno.land/x/udd@0.x/main.ts");
+  const u = new DenoLand("https://deno.land/x/up@0.x/main.ts");
   const latestVersion = (await u.versions())[0];
   const url = u.at(latestVersion);
   console.log(url);
@@ -75,11 +75,11 @@ async function main(args: string[]) {
     spinner.message = `Updating dependencies of ${depFiles.length} files...`;
   }
 
-  const options: UddOptions = { dryRun: a["dry-run"] };
-  const results: UddResult[] = [];
+  const options: UpOptions = { dryRun: a["dry-run"] };
+  const results: UpResult[] = [];
 
   await Promise.all(depFiles.map(async (filename) => {
-    results.push(...await udd(filename, options));
+    results.push(...await up(filename, options));
   }));
 
   spinner.stop();
