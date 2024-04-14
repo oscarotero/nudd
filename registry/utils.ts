@@ -1,107 +1,77 @@
 export abstract class RegistryUrl {
-  /** The module URL */
   url: string;
-
-  /** The package version */
-  abstract version: string;
-
-  /** The package name */
-  abstract name: string;
+  version: string;
+  name: string;
+  file: string;
 
   constructor(url: string) {
     this.url = url;
+
+    const { version, name, file } = this.parse();
+
+    this.version = version;
+    this.name = name;
+    this.file = file;
+  }
+
+  parse(atScope = true): ParseResult {
+    // Scoped
+    let match = atScope
+      ? this.url.match(/[/:](@[^/:]+)\/([^/:]+)@([^/]+)(.*)$/)
+      : this.url.match(/[/:]([^/:]+)\/([^/:]+)@([^/]+)(.*)$/);
+
+    if (match) {
+      return {
+        version: match[3],
+        name: `${match[1]}/${match[2]}`,
+        file: match[4],
+      };
+    }
+
+    // Unscoped
+    match = this.url.match(/[/:]([^/:]+)@([^/]+)(.*)$/);
+
+    if (match) {
+      return {
+        version: match[2],
+        name: match[1],
+        file: match[3],
+      };
+    }
+
+    throw new Error(`Unable to parse version in ${this.url}`);
   }
 
   /** Returns all available versions */
-  abstract all(): Promise<string[]>;
+  abstract versions(): Promise<string[]>;
 
-  /** Returns a new instance with a specific version */
-  abstract at(version: string): RegistryUrl;
-}
-
-export interface VersionsJson {
-  latest?: string;
-  versions?: string[];
-}
-
-export interface PackageInfo {
-  parts: string[];
-  scope: string;
-  packageName: string;
-  version: string;
+  /** Returns a URL with a specific version */
+  abstract at(version: string): string;
 }
 
 export interface RegistryCtor {
   new (url: string): RegistryUrl;
-  regexp: RegExp;
+  regexp: RegExp[];
 }
 
-export function lookup(url: string, registries: RegistryCtor[]):
-  | RegistryUrl
-  | undefined {
-  for (const R of registries) {
-    if (R.regexp.test(url)) {
-      return new R(url);
-    }
-  }
+export interface ParseResult {
+  version: string;
+  name: string;
+  file: string;
 }
 
-export function defaultAt(that: RegistryUrl, version: string): string {
-  return that.url.replace(/@(.*?)(\/|$)/, `@${version}/`);
-}
-
-export function defaultVersion(that: RegistryUrl): string {
-  const v = that.url.match(/\@([^\/]+)[\/$]?/);
-  if (v === null) {
-    throw Error(`Unable to find version in ${that.url}`);
-  }
-  return v[1];
-}
-
-export function defaultName(that: RegistryUrl): string {
-  const n = that.url.match(/([^\/\"\']*?)\@[^\'\"]*/);
-  if (n === null) {
-    throw new Error(`Package name not found in ${that.url}`);
-  }
-  return n[1];
-}
-
-export function defaultInfo(that: RegistryUrl): PackageInfo {
-  const parts = that.url.split("/");
-  const [packageName, version] = parts[4].split("@");
-  if (parts[3] === undefined) {
-    throw new Error(`Package scope not found in ${that.url}`);
-  }
-  if (packageName === undefined) {
-    throw new Error(`Package name not found in ${that.url}`);
-  }
-  if (version === undefined) {
-    throw new Error(`Unable to find version in ${that.url}`);
-  }
-  return {
-    scope: parts[3],
-    packageName,
-    version,
-    parts,
-  };
-}
-
-export function defaultScopeAt(that: RegistryUrl, version: string): string {
-  const { parts, packageName } = defaultInfo(that);
-  parts[4] = `${packageName}@${version}`;
-  return parts.join("/");
-}
-
-const cache: Map<string, Promise<string[]>> = new Map();
+export const cache: Map<string, Promise<string[]>> = new Map();
 
 export function readJson(
   url: string,
+  // deno-lint-ignore no-explicit-any
   cb: (json: any) => string[],
 ): Promise<string[]> {
   if (cache.has(url)) {
     return cache.get(url)!;
   }
 
+  console.log(`Fetching "${url}"`);
   const item = fetch(url).then((response) => {
     if (!response.ok) {
       throw new Error(`Failed to fetch ${url}`);
@@ -114,12 +84,23 @@ export function readJson(
 }
 
 export function importUrls(
-  tsContent: string,
+  content: string,
   registries: RegistryCtor[],
-): string[] {
-  // look up all the supported regex matches.
-  const rs: RegExp[] = registries.map((R) => R.regexp).map((re) =>
-    new RegExp(re, "g")
-  );
-  return rs.flatMap((regexp) => tsContent.match(regexp) || []);
+): RegistryUrl[] {
+  const urls: RegistryUrl[] = [];
+
+  for (const R of registries) {
+    const allRegexp = R.regexp.map((r) =>
+      new RegExp(`['"]${r.source}['"]`, "g")
+    );
+
+    for (const regexp of allRegexp) {
+      const match = content.match(regexp);
+      match?.forEach((url) =>
+        urls.push(new R(url.replace(/['"]/g, "") as string))
+      );
+    }
+  }
+
+  return urls;
 }

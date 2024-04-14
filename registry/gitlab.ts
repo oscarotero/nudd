@@ -1,41 +1,36 @@
-import { readJson, RegistryUrl } from "./utils.ts";
-
-async function gitlabReleases(
-  owner: string,
-  repo: string,
-): Promise<string[]> {
-  const url =
-    `https://gitlab.com/api/v4/projects/${owner}%2F${repo}/repository/tags`;
-  return await readJson(url, (json) => {
-    return json.map((tag: { name: string }) => tag.name);
-  });
-}
+import { ParseResult, readJson, RegistryUrl } from "./utils.ts";
 
 export class GitlabRaw extends RegistryUrl {
-  static regexp =
-    /https?:\/\/gitlab\.com\/[^\/\"\']+\/[^\/\"\']+\/-\/raw\/(?!master)[^\/\"\']+\/[^\'\"]*/;
+  static regexp = [
+    /https?:\/\/gitlab\.com\/[^/"']+\/[^/"']+\/-\/raw\/(?!master)[^/"']+\/[^'"]*/,
+  ];
 
-  get version(): string {
-    const v = this.url.split("/")[7];
-    if (v === undefined) {
-      throw Error(`Unable to find version in ${this.url}`);
+  parse(): ParseResult {
+    const match = this.url.match(
+      /https?:\/\/gitlab\.com\/([^/]+\/[^/]+)\/-\/raw\/([^/]+)(.*)/,
+    );
+
+    if (match === null) {
+      throw new Error(`Unable to parse ${this.url}`);
     }
-    return v;
+
+    return {
+      name: match[1],
+      version: match[2],
+      file: match[3],
+    };
   }
 
-  get name(): string {
-    const [, , , user, repo] = this.url.split("/");
-    return `${user}/${repo}`;
+  async versions(): Promise<string[]> {
+    const id = this.name.replaceAll("/", "%2F");
+
+    return await readJson(
+      `https://gitlab.com/api/v4/projects/${id}/repository/tags`,
+      (json) => json.map((tag: { name: string }) => tag.name),
+    );
   }
 
-  all(): Promise<string[]> {
-    const [user, repo] = this.name.split("/");
-    return gitlabReleases(user, repo);
-  }
-
-  at(version: string): RegistryUrl {
-    const parts = this.url.split("/");
-    parts[7] = version;
-    return new GitlabRaw(parts.join("/"));
+  at(version: string): string {
+    return `https://gitlab.com/${this.name}/-/raw/${version}${this.file}`;
   }
 }

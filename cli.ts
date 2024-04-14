@@ -1,6 +1,6 @@
 // deno -A main.ts deps.ts --test="deno test"
 
-import { colors, expandGlob, parseArgs } from "./deps.ts";
+import { colors, expandGlob, parseArgs, Spinner } from "./deps.ts";
 import { udd, UddOptions, UddResult } from "./mod.ts";
 import { DenoLand } from "./registry/denoland.ts";
 
@@ -15,7 +15,6 @@ Positional arguments:
 Optional arguments:
  -h, --help \tshow this help text
  --dry-run  \ttest what dependencies can be updated
- --test TEST\tcommand to run after each dependency update e.g. "deno test"
  --upgrade  \tupdate udd to the latest version
  --version  \tprint the version of udd`);
 }
@@ -32,8 +31,8 @@ function version() {
 
 async function upgrade() {
   const u = new DenoLand("https://deno.land/x/udd@0.x/main.ts");
-  const latestVersion = (await u.all())[0];
-  const url = u.at(latestVersion).url;
+  const latestVersion = (await u.versions())[0];
+  const url = u.at(latestVersion);
   console.log(url);
 
   // TODO;
@@ -54,7 +53,11 @@ async function main(args: string[]) {
     return version();
   }
 
+  const spinner = new Spinner({ message: "Scanning files..." });
+  spinner.start();
+
   const depFiles: string[] = [];
+
   for (const arg of a._.map((x) => x.toString())) {
     for await (const file of expandGlob(arg)) {
       depFiles.push(file.path);
@@ -66,19 +69,23 @@ async function main(args: string[]) {
     Deno.exit(1);
   }
 
-  // TODO verbosity/quiet argument?
+  if (depFiles.length === 1) {
+    spinner.message = `Updating dependencies of ${depFiles[0]}...`;
+  } else {
+    spinner.message = `Updating dependencies of ${depFiles.length} files...`;
+  }
+
   const options: UddOptions = { dryRun: a["dry-run"] };
   const results: UddResult[] = [];
 
-  for (const [i, fn] of depFiles.entries()) {
-    if (i !== 0) console.log();
-    console.log(colors.yellow(fn));
-    results.push(...await udd(fn, options));
-  }
+  await Promise.all(depFiles.map(async (filename) => {
+    results.push(...await udd(filename, options));
+  }));
 
-  // TODO perhaps a table would be a nicer output?
+  spinner.stop();
 
   const alreadyLatest = results.filter((x) => x.newVersion === undefined);
+
   if (alreadyLatest.length > 0) {
     console.log(colors.bold("\nAlready latest version:"));
     for (const a of alreadyLatest) {

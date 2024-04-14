@@ -7,11 +7,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: denoland/setup-deno@v1
-        with:
-          deno-version: 1.20.2
       - name: Check format
         run: deno fmt --check
       - name: Run lint
         run: deno lint
       - name: Run test
-        run: deno test --allow-read --allow-write
+        run: deno task test

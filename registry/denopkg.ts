@@ -1,31 +1,18 @@
-import {
-  defaultAt,
-  defaultName,
-  defaultVersion,
-  RegistryUrl,
-} from "./utils.ts";
-import { githubReleases } from "./github.ts";
+import { RegistryUrl } from "./utils.ts";
+import { githubVersions } from "./github.ts";
 
 export class Denopkg extends RegistryUrl {
-  static regexp = /https?:\/\/denopkg.com\/[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
+  static regexp = [/https?:\/\/denopkg.com\/[^/"']*?\/[^/"']*?\@[^'"]*/];
 
-  get version(): string {
-    return defaultVersion(this);
+  parse() {
+    return super.parse(false);
   }
 
-  get name(): string {
-    const owner = this.url.split("/")[3];
-    const name = defaultName(this);
-
-    return `${owner}/${name}`;
+  async versions(): Promise<string[]> {
+    return await githubVersions(this.name);
   }
 
-  async all(): Promise<string[]> {
-    return await githubReleases(this.name);
-  }
-
-  at(version: string): RegistryUrl {
-    const url = defaultAt(this, version);
-    return new Denopkg(url);
+  at(version: string): string {
+    return `https://denopkg.com/${this.name}@${version}${this.file}`;
   }
 }

@@ -1,0 +1,16 @@
+import "https://raw.githubusercontent.com/foo/bar/0.1.0/mod.ts";
+import "https://pax.deno.dev/foo/bar@0.1.0/mod.ts";
+import "https://denopkg.com/foo/bar@0.1.0/mod.ts";
+import "https://esm.sh/foo-bar@0.1.0/mod.ts";
+import "https://esm.sh/@foo/bar@0.1.0/mod.ts";
+import "https://gitlab.com/foo/bar/-/raw/0.1.0/mod.ts";
+import "https://cdn.jsdelivr.net/gh/foo/bar@0.1.0/mod.ts";
+import "https://dev.jspm.io/npm:foo-bar@0.1.0";
+import "npm:foo-bar@0.1.0";
+import "https://x.nest.land/foo-bar@0.1.0/mod.ts";
+import "https://cdn.skypack.dev/foo-bar@0.1.0";
+import "https://cdn.skypack.dev/@foo/bar@0.1.0/mod.ts";
+import "https://cdn.pika.dev/foo-bar@0.1.0";
+import "https://cdn.pika.dev/@foo/bar@0.1.0/mod.ts";
+import "https://unpkg.com/foo-bar@0.1.0";
+import "https://unpkg.com/@foo/bar@0.1.0/mod.ts";

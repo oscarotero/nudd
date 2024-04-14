@@ -1,53 +1,19 @@
-import {
-  defaultAt,
-  defaultInfo,
-  defaultName,
-  defaultScopeAt,
-  defaultVersion,
-  RegistryUrl,
-} from "./utils.ts";
-import { allVersions } from "./npm.ts";
-
-export class SkypackScope extends RegistryUrl {
-  static regexp =
-    /https?:\/\/cdn\.skypack\.dev(\/\_)?\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
-
-  get version(): string {
-    return defaultInfo(this).version;
-  }
-
-  get name(): string {
-    const { scope, packageName } = defaultInfo(this);
-    return `${scope}/${packageName}`;
-  }
-
-  async all(): Promise<string[]> {
-    return await allVersions(this.name);
-  }
-
-  at(version: string): RegistryUrl {
-    const url = defaultScopeAt(this, version);
-    return new SkypackScope(url);
-  }
-}
+import { RegistryUrl } from "./utils.ts";
+import { npmVersions } from "./npm.ts";
 
 export class Skypack extends RegistryUrl {
-  static regexp = /https?:\/\/cdn.skypack.dev(\/\_)?\/[^\/\"\']*?\@[^\'\"]*/;
+  static regexp = [
+    /https?:\/\/cdn.skypack.dev(\/\_)?\/[^/"']*?\@[^'"]*/,
+    /https?:\/\/cdn\.skypack\.dev(\/\_)?\/@[^/"']*?\/[^/"']*?\@[^'"]*/,
+    /https?:\/\/cdn.pika.dev(\/\_)?\/[^/"']*?\@[^'"]*/,
+    /https?:\/\/cdn\.pika\.dev(\/\_)?\/@[^/"']*?\/[^/"']*?\@[^'"]*/,
+  ];
 
-  get version(): string {
-    return defaultVersion(this);
+  async versions(): Promise<string[]> {
+    return await npmVersions(this.name);
   }
 
-  get name(): string {
-    return defaultName(this);
-  }
-
-  async all(): Promise<string[]> {
-    return await allVersions(this.name);
-  }
-
-  at(version: string): RegistryUrl {
-    const url = defaultAt(this, version);
-    return new Skypack(url);
+  at(version: string): string {
+    return `https://cdn.skypack.dev/${this.name}@${version}${this.file}`;
   }
 }

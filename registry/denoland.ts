@@ -1,22 +1,11 @@
-import { defaultAt, defaultVersion, readJson, RegistryUrl } from "./utils.ts";
+import { readJson, RegistryUrl } from "./utils.ts";
 
 export class DenoLand extends RegistryUrl {
-  static regexp =
-    /https?:\/\/deno.land\/(?:std\@[^\'\"]*|x\/[^\/\"\']*?\@[^\'\"]*)/;
+  static regexp = [
+    /https?:\/\/deno.land\/(?:std\@[^'"]*|x\/[^/"']*?\@[^'"]*)/,
+  ];
 
-  get version(): string {
-    return defaultVersion(this);
-  }
-
-  get name(): string {
-    const [, stdGroup, xGroup] = this.url.match(
-      /deno\.land\/(?:(std)|x\/([^/@]*))/,
-    )!;
-
-    return stdGroup ?? xGroup;
-  }
-
-  async all(): Promise<string[]> {
+  async versions(): Promise<string[]> {
     const name = this.name;
     const url = `https://cdn.deno.land/${name}/meta/versions.json`;
 
@@ -28,8 +17,11 @@ export class DenoLand extends RegistryUrl {
     });
   }
 
-  at(version: string): RegistryUrl {
-    const url = defaultAt(this, version);
-    return new DenoLand(url);
+  at(version: string): string {
+    if (this.name === "std") {
+      return `https://deno.land/${this.name}@${version}${this.file}`;
+    }
+
+    return `https://deno.land/x/${this.name}@${version}${this.file}`;
   }
 }

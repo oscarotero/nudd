@@ -1,18 +1,11 @@
-import { defaultAt, defaultVersion, readJson, RegistryUrl } from "./utils.ts";
+import { readJson, RegistryUrl } from "./utils.ts";
 
 export class NestLand extends RegistryUrl {
-  static regexp =
-    /https?:\/\/x\.nest\.land\/[^\/\"\']+@(?!master)[^\/\"\']+\/[^\'\"]*/;
+  static regexp = [
+    /https?:\/\/x\.nest\.land\/[^/"']+@(?!master)[^/"']+\/[^'"]*/,
+  ];
 
-  get version(): string {
-    return defaultVersion(this);
-  }
-
-  get name(): string {
-    return this.url.split("/")[3].split("@")[0];
-  }
-
-  async all(): Promise<string[]> {
+  async versions(): Promise<string[]> {
     const url = `https://x.nest.land/api/package/${this.name}`;
 
     return await readJson(
@@ -24,8 +17,7 @@ export class NestLand extends RegistryUrl {
     );
   }
 
-  at(version: string): RegistryUrl {
-    const url = defaultAt(this, version);
-    return new NestLand(url);
+  at(version: string): string {
+    return `https://x.nest.land/${this.name}@${version}${this.file}`;
   }
 }

@@ -1,36 +1,37 @@
-import { readJson, RegistryUrl } from "./utils.ts";
+import { ParseResult, readJson, RegistryUrl } from "./utils.ts";
 
 export class GithubRaw extends RegistryUrl {
-  static regexp =
-    /https?:\/\/raw\.githubusercontent\.com\/[^\/\"\']+\/[^\/\"\']+\/(?!master)[^\/\"\']+\/[^\'\"]*/;
+  static regexp = [
+    /https?:\/\/raw\.githubusercontent\.com\/[^/"']+\/[^/"']+\/(?!master)[^/"']+\/[^'"]*/,
+  ];
 
-  get version(): string {
-    const v = this.url.split("/")[5];
-    if (v === undefined) {
-      throw Error(`Unable to find version in ${this.url}`);
+  parse(): ParseResult {
+    const match = this.url.match(
+      /https?:\/\/raw\.githubusercontent\.com\/([^/]+\/[^/]+)\/([^/]+)(.*)/,
+    );
+
+    if (match === null) {
+      throw new Error(`Unable to parse ${this.url}`);
     }
-    return v;
+    return {
+      name: match[1],
+      version: match[2],
+      file: match[3],
+    };
   }
 
-  get name(): string {
-    const [, , , user, repo] = this.url.split("/");
-    return `${user}/${repo}`;
+  versions(): Promise<string[]> {
+    return githubVersions(this.name);
   }
 
-  all(): Promise<string[]> {
-    return githubReleases(this.name);
-  }
-
-  at(version: string): RegistryUrl {
-    const parts = this.url.split("/");
-    parts[5] = version;
-    return new GithubRaw(parts.join("/"));
+  at(version: string): string {
+    return `https://raw.githubusercontent.com/${this.name}/${version}${this.file}`;
   }
 }
 
-export async function githubReleases(repo: string): Promise<string[]> {
-  const url = `https://api.github.com/repos/${repo}/releases`;
+export async function githubVersions(repo: string): Promise<string[]> {
+  const url = `https://api.github.com/repos/${repo}/tags`;
   return await readJson(url, (json) =>
     // deno-lint-ignore no-explicit-any
-    json.map((x: any) => x.tag_name));
+    json.map((x: any) => x.name));
 }
