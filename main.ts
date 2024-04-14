@@ -4,32 +4,6 @@ import { colors, expandGlob, parseArgs } from "./deps.ts";
 import { udd, UddOptions, UddResult } from "./mod.ts";
 import { DenoLand } from "./registry/denoland.ts";
 
-function testsThunk(tests: string[]): () => Promise<void> {
-  return async () => {
-    for (const t of tests) {
-      // FIXME is there a better way to split / pass arrays?
-      // This fails if you wanted to pass e.g. --foo="a b"
-      const p = Deno.run({
-        cmd: t.split(" "),
-        stdout: "piped",
-        stderr: "piped",
-      });
-      const success = (await p.status()).success;
-      if (!success) {
-        console.log();
-        await Deno.stdout.write(await p.stderrOutput());
-      }
-      // This close handling cleans up resouces but is not required...
-      p.close();
-      p.stdout!.close();
-      p.stderr!.close();
-      if (!success) {
-        throw new Error(t);
-      }
-    }
-  };
-}
-
 function help() {
   console.log(`usage: udd [-h] [--dry-run] [--test TEST] file [file ...]
 
@@ -56,34 +30,13 @@ function version() {
   }
 }
 
-// https://github.com/jurassiscripts/velociraptor/blob/971b7db71cf635b0c8f2de822aa4270e52cce498/src/util.ts#L22-L39
-async function spawn(args: string[], cwd?: string): Promise<string> {
-  const process = Deno.run({
-    cmd: args,
-    cwd,
-    stdout: "piped",
-    stderr: "piped",
-  });
-  const { code } = await process.status();
-  if (code === 0) {
-    const rawOutput = await process.output();
-    process.close();
-    return new TextDecoder().decode(rawOutput);
-  } else {
-    const error = new TextDecoder().decode(await process.stderrOutput());
-    process.close();
-    throw new Error(error);
-  }
-}
-
 async function upgrade() {
   const u = new DenoLand("https://deno.land/x/udd@0.x/main.ts");
   const latestVersion = (await u.all())[0];
   const url = u.at(latestVersion).url;
   console.log(url);
 
-  // TODO support alternative name to udd if that's what's been used before.
-  await spawn([Deno.execPath(), "install", "--reload", "-qAfn", "udd", url]);
+  // TODO;
 }
 
 async function main(args: string[]) {
@@ -113,27 +66,10 @@ async function main(args: string[]) {
     Deno.exit(1);
   }
 
-  let tests: string[] = [];
-  if (a.test instanceof Array) {
-    tests = a.test;
-  } else if (a.test) {
-    tests = [a.test as string];
-  }
-
-  const thunk = testsThunk(tests);
-  try {
-    await thunk();
-  } catch {
-    console.error(
-      colors.red("Tests failed prior to updating any dependencies"),
-    );
-    Deno.exit(1);
-  }
-
   // TODO verbosity/quiet argument?
-  const options: UddOptions = { dryRun: a["dry-run"], test: thunk };
-
+  const options: UddOptions = { dryRun: a["dry-run"] };
   const results: UddResult[] = [];
+
   for (const [i, fn] of depFiles.entries()) {
     if (i !== 0) console.log();
     console.log(colors.yellow(fn));
@@ -142,7 +78,7 @@ async function main(args: string[]) {
 
   // TODO perhaps a table would be a nicer output?
 
-  const alreadyLatest = results.filter((x) => x.message === undefined);
+  const alreadyLatest = results.filter((x) => x.newVersion === undefined);
   if (alreadyLatest.length > 0) {
     console.log(colors.bold("\nAlready latest version:"));
     for (const a of alreadyLatest) {
@@ -150,29 +86,16 @@ async function main(args: string[]) {
     }
   }
 
-  const successes = results.filter((x) => x.success === true);
-  if (successes.length > 0) {
+  const updated = results.filter((x) => x.newVersion !== undefined);
+  if (updated.length > 0) {
     console.log(
       colors.bold(
         options.dryRun ? "\nAble to update:" : "\nSuccessfully updated:",
       ),
     );
-    for (const s of successes) {
-      console.log(colors.green(s.initUrl), s.initVersion, "->", s.message);
+    for (const s of updated) {
+      console.log(colors.green(s.initUrl), s.initVersion, "->", s.newVersion);
     }
-  }
-
-  const failures = results.filter((x) => x.success === false);
-  if (failures.length > 0) {
-    console.log(
-      colors.bold(
-        options.dryRun ? "\nUnable to update:" : "\nFailed to update:",
-      ),
-    );
-    for (const f of failures) {
-      console.log(colors.red(f.initUrl), f.initVersion, "->", f.message);
-    }
-    Deno.exit(1);
   }
 }
 

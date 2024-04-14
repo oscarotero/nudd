@@ -1,7 +1,7 @@
 import { Progress, SilentProgress } from "./progress.ts";
-import { importUrls } from "./search.ts";
 import { getLatestVersion, parse } from "./semver.ts";
 import {
+  importUrls,
   lookup,
   type RegistryCtor,
   type RegistryUrl,
@@ -55,8 +55,6 @@ export interface UddOptions {
   dryRun?: boolean;
   // don't print progress messages
   quiet?: boolean;
-  // if this function errors then the update is reverted
-  test?: () => Promise<void>;
 
   _registries?: RegistryCtor[];
 }
@@ -64,13 +62,11 @@ export interface UddOptions {
 export interface UddResult {
   initUrl: string;
   initVersion: string;
-  message?: string;
-  success?: boolean;
+  newVersion?: string;
 }
 
 export class Udd {
   private filename: string;
-  private test: () => Promise<void>;
   private options: UddOptions;
   private progress: Progress;
   private registries: RegistryCtor[];
@@ -82,18 +78,11 @@ export class Udd {
     this.filename = filename;
     this.options = options;
     this.registries = options._registries || REGISTRIES;
-    // deno-lint-ignore require-await
-    this.test = options.test || (async () => undefined);
     this.progress = options.quiet ? new SilentProgress(1) : new Progress(1);
   }
 
-  async content(): Promise<string> {
-    const decoder = new TextDecoder();
-    return decoder.decode(await Deno.readFile(this.filename));
-  }
-
   async run(): Promise<UddResult[]> {
-    const content: string = await this.content();
+    const content: string = Deno.readTextFileSync(this.filename);
 
     const urls: string[] = importUrls(content, this.registries);
     this.progress.n = urls.length;
@@ -133,42 +122,28 @@ export class Udd {
       return { initUrl, initVersion };
     }
 
-    let failed = false;
     if (!this.options.dryRun) {
       await this.progress.log(`Attempting update: ${url.url} -> ${newVersion}`);
-      failed = await this.maybeReplace(url, newVersion, initUrl);
-      const msg = failed ? "failed" : "successful";
-      await this.progress.log(`Update ${msg}: ${url.url} -> ${newVersion}`);
+      this.replace(url, newVersion, initUrl);
+      await this.progress.log(`Update successful: ${url.url} -> ${newVersion}`);
     }
 
     return {
       initUrl,
       initVersion,
-      message: newVersion,
-      success: !failed,
+      newVersion,
     };
   }
 
   // Note: we pass initUrl because it may have been modified with fragments :(
-  async maybeReplace(
+  replace(
     url: RegistryUrl,
     newVersion: string,
     initUrl: string,
-  ): Promise<boolean> {
+  ): void {
     const newUrl = url.at(newVersion).url;
-    await this.replace(initUrl, newUrl);
-
-    const failed = await this.test().then((_) => false).catch((_) => true);
-    if (failed) {
-      await this.replace(newUrl, initUrl);
-    }
-    return failed;
-  }
-
-  async replace(left: string, right: string) {
-    const content = await this.content();
-    const newContent = content.split(left).join(right);
-    const encoder = new TextEncoder();
-    await Deno.writeFile(this.filename, encoder.encode(newContent));
+    const content = Deno.readTextFileSync(this.filename);
+    const newContent = content.split(initUrl).join(newUrl);
+    Deno.writeTextFileSync(this.filename, newContent);
   }
 }

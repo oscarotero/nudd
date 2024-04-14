@@ -30,8 +30,7 @@ export class JsDelivr extends RegistryUrl {
   }
 
   all(): Promise<string[]> {
-    const [user, repo] = this.name.split("/");
-    return githubReleases(user, repo);
+    return githubReleases(this.name);
   }
 
   at(version: string): RegistryUrl {

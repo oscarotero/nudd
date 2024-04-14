@@ -6,7 +6,7 @@ import {
   defaultVersion,
   RegistryUrl,
 } from "./utils.ts";
-import { unpkgVersions } from "./unpkg.ts";
+import { allVersions } from "./npm.ts";
 
 export class PikaScope extends RegistryUrl {
   static regexp =
@@ -22,7 +22,7 @@ export class PikaScope extends RegistryUrl {
   }
 
   async all(): Promise<string[]> {
-    return await unpkgVersions(this.name);
+    return await allVersions(this.name);
   }
 
   at(version: string): RegistryUrl {
@@ -43,7 +43,7 @@ export class Pika extends RegistryUrl {
   }
 
   async all(): Promise<string[]> {
-    return await unpkgVersions(this.name);
+    return await allVersions(this.name);
   }
 
   at(version: string): RegistryUrl {

@@ -91,3 +91,35 @@ export function defaultScopeAt(that: RegistryUrl, version: string): string {
   parts[4] = `${packageName}@${version}`;
   return parts.join("/");
 }
+
+const cache: Map<string, Promise<string[]>> = new Map();
+
+export function readJson(
+  url: string,
+  cb: (json: any) => string[],
+): Promise<string[]> {
+  if (cache.has(url)) {
+    return cache.get(url)!;
+  }
+
+  const item = fetch(url).then((response) => {
+    if (!response.ok) {
+      throw new Error(`Failed to fetch ${url}`);
+    }
+    return response.json();
+  }).then(cb);
+
+  cache.set(url, item);
+  return item;
+}
+
+export function importUrls(
+  tsContent: string,
+  registries: RegistryCtor[],
+): string[] {
+  // look up all the supported regex matches.
+  const rs: RegExp[] = registries.map((R) => R.regexp).map((re) =>
+    new RegExp(re, "g")
+  );
+  return rs.flatMap((regexp) => tsContent.match(regexp) || []);
+}

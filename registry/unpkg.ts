@@ -1,3 +1,4 @@
+import { allVersions } from "./npm.ts";
 import {
   defaultAt,
   defaultInfo,
@@ -20,7 +21,7 @@ export class UnpkgScope extends RegistryUrl {
   }
 
   async all(): Promise<string[]> {
-    return await unpkgVersions(this.name);
+    return await allVersions(this.name);
   }
 
   at(version: string): RegistryUrl {
@@ -41,20 +42,11 @@ export class Unpkg extends RegistryUrl {
   }
 
   async all(): Promise<string[]> {
-    return await unpkgVersions(this.name);
+    return await allVersions(this.name);
   }
 
   at(version: string): RegistryUrl {
     const url = defaultAt(this, version);
     return new Unpkg(url);
   }
-}
-
-export async function unpkgVersions(name: string): Promise<string[]> {
-  const page = await fetch(`https://unpkg.com/browse/${name}/`);
-  const text = await page.text();
-  // naively, we grab all the options
-  const m = [...text.matchAll(/\<option[^\<\>]* value\=\"(.*?)\"\>/g)];
-  m.reverse();
-  return m.map((x) => x[1]);
 }

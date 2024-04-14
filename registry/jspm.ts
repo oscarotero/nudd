@@ -4,7 +4,7 @@ import {
   defaultVersion,
   RegistryUrl,
 } from "./utils.ts";
-import { unpkgVersions } from "./unpkg.ts";
+import { allVersions } from "./npm.ts";
 
 export class Jspm extends RegistryUrl {
   static regexp = /https?:\/\/dev.jspm.io\/[^\/\"\']*?\@[^\'\"]*/;
@@ -18,7 +18,7 @@ export class Jspm extends RegistryUrl {
   }
 
   async all(): Promise<string[]> {
-    return await unpkgVersions(this.name);
+    return await allVersions(this.name);
   }
 
   at(version: string): RegistryUrl {

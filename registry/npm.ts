@@ -1,6 +1,5 @@
-import { RegistryUrl, type VersionsJson } from "./utils.ts";
+import { readJson, RegistryUrl } from "./utils.ts";
 
-const NPM_CACHE: Map<string, string[]> = new Map<string, string[]>();
 const parseRegex = /^npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^/]+))?(.*)/;
 
 export class Npm extends RegistryUrl {
@@ -20,28 +19,7 @@ export class Npm extends RegistryUrl {
   }
 
   async all(): Promise<string[]> {
-    const name = this.name;
-
-    if (NPM_CACHE.has(name)) {
-      return NPM_CACHE.get(name)!;
-    }
-
-    try {
-      const json: VersionsJson =
-        await (await fetch(`https://registry.npmjs.org/${name}`))
-          .json();
-      if (!json.versions) {
-        throw new Error(`versions.json for ${name} has incorrect format`);
-      }
-
-      const versions = Object.keys(json.versions).reverse();
-      NPM_CACHE.set(name, versions);
-      return versions;
-    } catch (err) {
-      // TODO this could be a permissions error e.g. no --allow-net...
-      console.error(`error getting versions for ${name}`);
-      throw err;
-    }
+    return await allVersions(this.name);
   }
 
   at(version: string): RegistryUrl {
@@ -49,4 +27,13 @@ export class Npm extends RegistryUrl {
     const url = `npm:${name}@${version}${files}`;
     return new Npm(url);
   }
+}
+
+export function allVersions(name: string): Promise<string[]> {
+  return readJson(`https://registry.npmjs.org/${name}`, (json) => {
+    if (!json.versions) {
+      throw new Error(`versions.json for ${name} has incorrect format`);
+    }
+    return Object.keys(json.versions);
+  });
 }

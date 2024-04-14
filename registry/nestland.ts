@@ -1,30 +1,4 @@
-import { defaultAt, defaultVersion, RegistryUrl } from "./utils.ts";
-
-interface NestLandResponse {
-  // a list of names of the form "<repo>@<version>"
-  packageUploadNames?: string[];
-}
-
-const NL_CACHE: Map<string, string[]> = new Map<string, string[]>();
-async function nestlandReleases(
-  repo: string,
-  cache: Map<string, string[]> = NL_CACHE,
-): Promise<string[]> {
-  if (cache.has(repo)) {
-    return cache.get(repo)!;
-  }
-
-  const url = `https://x.nest.land/api/package/${repo}`;
-  const { packageUploadNames }: NestLandResponse = await (await fetch(url))
-    .json();
-
-  if (!packageUploadNames) {
-    return [];
-  }
-
-  // reverse so newest versions are first
-  return packageUploadNames.map((name) => name.split("@")[1]).reverse();
-}
+import { defaultAt, defaultVersion, readJson, RegistryUrl } from "./utils.ts";
 
 export class NestLand extends RegistryUrl {
   static regexp =
@@ -38,8 +12,16 @@ export class NestLand extends RegistryUrl {
     return this.url.split("/")[3].split("@")[0];
   }
 
-  all(): Promise<string[]> {
-    return nestlandReleases(this.name);
+  async all(): Promise<string[]> {
+    const url = `https://x.nest.land/api/package/${this.name}`;
+
+    return await readJson(
+      url,
+      (json) =>
+        (json.packageUploadNames || []).map((name: string) =>
+          name.split("@")[1]
+        ),
+    );
   }
 
   at(version: string): RegistryUrl {

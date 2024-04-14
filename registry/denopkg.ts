@@ -21,8 +21,7 @@ export class Denopkg extends RegistryUrl {
   }
 
   async all(): Promise<string[]> {
-    const [owner, name] = this.name.split("/");
-    return await githubReleases(owner, name);
+    return await githubReleases(this.name);
   }
 
   at(version: string): RegistryUrl {

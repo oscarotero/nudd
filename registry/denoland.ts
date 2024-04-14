@@ -1,11 +1,4 @@
-import {
-  defaultAt,
-  defaultVersion,
-  RegistryUrl,
-  type VersionsJson,
-} from "./utils.ts";
-
-const DL_CACHE: Map<string, string[]> = new Map<string, string[]>();
+import { defaultAt, defaultVersion, readJson, RegistryUrl } from "./utils.ts";
 
 export class DenoLand extends RegistryUrl {
   static regexp =
@@ -25,26 +18,14 @@ export class DenoLand extends RegistryUrl {
 
   async all(): Promise<string[]> {
     const name = this.name;
+    const url = `https://cdn.deno.land/${name}/meta/versions.json`;
 
-    if (DL_CACHE.has(name)) {
-      return DL_CACHE.get(name)!;
-    }
-
-    try {
-      const json: VersionsJson =
-        await (await fetch(`https://cdn.deno.land/${name}/meta/versions.json`))
-          .json();
+    return await readJson(url, (json) => {
       if (!json.versions) {
         throw new Error(`versions.json for ${name} has incorrect format`);
       }
-
-      DL_CACHE.set(name, json.versions);
       return json.versions;
-    } catch (err) {
-      // TODO this could be a permissions error e.g. no --allow-net...
-      console.error(`error getting versions for ${name}`);
-      throw err;
-    }
+    });
   }
 
   at(version: string): RegistryUrl {

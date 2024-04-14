@@ -6,7 +6,7 @@ import {
   defaultVersion,
   RegistryUrl,
 } from "./utils.ts";
-import { unpkgVersions } from "./unpkg.ts";
+import { allVersions } from "./npm.ts";
 
 export class EsmShScope extends RegistryUrl {
   static regexp = /https?:\/\/esm\.sh\/@[^\/\"\']*?\/[^\/\"\']*?\@[^\'\"]*/;
@@ -21,7 +21,7 @@ export class EsmShScope extends RegistryUrl {
   }
 
   async all(): Promise<string[]> {
-    return await unpkgVersions(this.name);
+    return await allVersions(this.name);
   }
 
   at(version: string): RegistryUrl {
@@ -42,7 +42,7 @@ export class EsmSh extends RegistryUrl {
   }
 
   async all(): Promise<string[]> {
-    return await unpkgVersions(this.name);
+    return await allVersions(this.name);
   }
 
   at(version: string): RegistryUrl {
