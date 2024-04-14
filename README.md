@@ -6,6 +6,13 @@ versions. This package is a fork of the original
 [Andy Hayden](https://github.com/hayd) with significant modifications and
 renamed to `nudd` (New Udd).
 
+The biggest differences from the original package are:
+
+- Updated dependencies and Deno API. Most code has been refactored.
+- Nudd only updates to stable versions.
+- Nudd only updates to the latest version (removed fragment feature).
+- Removed `--test` feature.
+
 ## Install
 
 ```sh

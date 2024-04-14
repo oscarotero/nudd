@@ -4,7 +4,7 @@ const parseRegex = /^npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^/]+))?(.*)/;
 
 export class Npm extends RegistryUrl {
   static regexp = [
-    /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^/"']+))?[^'"]/,
+    /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^/"']+))?[^'"]*/,
   ];
 
   async versions(): Promise<string[]> {
