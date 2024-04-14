@@ -1,13 +1,11 @@
-// deno -A main.ts deps.ts --test="deno test"
-
 import { colors, expandGlob, parseArgs, Spinner } from "./deps.ts";
-import { dd, DdOptions, DdResult } from "./mod.ts";
+import { nudd, NuddOptions, NuddResult } from "./mod.ts";
 import { DenoLand } from "./registry/denoland.ts";
 
 function help() {
-  console.log(`usage: dd [-h] [--dry-run] file [file ...]
+  console.log(`usage: nudd [-h] [--dry-run] file [file ...]
 
-dd: Deno Dependencies
+nudd: Deno Dependencies
 
 Positional arguments:
   file      \tfiles to update dependencies
@@ -30,7 +28,7 @@ function version() {
 }
 
 async function upgrade() {
-  const u = new DenoLand("https://deno.land/x/dd@0.x/main.ts");
+  const u = new DenoLand("https://deno.land/x/nudd@0.x/main.ts");
   const latestVersion = (await u.versions())[0];
   const url = u.at(latestVersion);
   console.log(url);
@@ -39,6 +37,7 @@ async function upgrade() {
 }
 
 async function main(args: string[]) {
+  console.log(args);
   const a = parseArgs(args, {
     boolean: ["dry-run", "h", "help", "upgrade", "version"],
   });
@@ -55,9 +54,9 @@ async function main(args: string[]) {
 
   const spinner = new Spinner({ message: "Scanning files..." });
   spinner.start();
-
+  console.log(spinner);
   const depFiles: string[] = [];
-
+  console.log(depFiles);
   for (const arg of a._.map((x) => x.toString())) {
     for await (const file of expandGlob(arg)) {
       depFiles.push(file.path);
@@ -65,6 +64,7 @@ async function main(args: string[]) {
   }
 
   if (depFiles.length === 0) {
+    spinner.stop();
     help();
     Deno.exit(1);
   }
@@ -75,11 +75,11 @@ async function main(args: string[]) {
     spinner.message = `Updating dependencies of ${depFiles.length} files...`;
   }
 
-  const options: DdOptions = { dryRun: a["dry-run"] };
-  const results: DdResult[] = [];
+  const options: NuddOptions = { dryRun: a["dry-run"] };
+  const results: NuddResult[] = [];
 
   await Promise.all(depFiles.map(async (filename) => {
-    results.push(...await dd(filename, options));
+    results.push(...await nudd(filename, options));
   }));
 
   spinner.stop();
@@ -107,5 +107,6 @@ async function main(args: string[]) {
 }
 
 if (import.meta.main) {
+  console.log("main");
   await main(Deno.args);
 }
