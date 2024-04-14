@@ -28,27 +28,27 @@ const registries = [
   Npm,
 ];
 
-export interface UpOptions {
+export interface DdOptions {
   // don't permanently edit files
   dryRun?: boolean;
 }
 
-export interface UpResult {
+export interface DdResult {
   initUrl: string;
   initVersion: string;
   newVersion?: string;
 }
 
-export async function up(
+export async function dd(
   filename: string,
-  options: UpOptions,
-): Promise<UpResult[]> {
+  options: DdOptions,
+): Promise<DdResult[]> {
   let content: string = Deno.readTextFileSync(filename);
   let changed = false;
   const urls: RegistryUrl[] = importUrls(content, registries);
 
   // from a url we need to extract the current version
-  const results: UpResult[] = [];
+  const results: DdResult[] = [];
 
   for (const v of urls) {
     const initUrl: string = v.url;

@@ -1,13 +1,13 @@
 // deno -A main.ts deps.ts --test="deno test"
 
 import { colors, expandGlob, parseArgs, Spinner } from "./deps.ts";
-import { up, UpOptions, UpResult } from "./mod.ts";
+import { dd, DdOptions, DdResult } from "./mod.ts";
 import { DenoLand } from "./registry/denoland.ts";
 
 function help() {
-  console.log(`usage: up [-h] [--dry-run] [--test TEST] file [file ...]
+  console.log(`usage: dd [-h] [--dry-run] file [file ...]
 
-up: Update Deno Dependencies
+dd: Deno Dependencies
 
 Positional arguments:
   file      \tfiles to update dependencies
@@ -30,7 +30,7 @@ function version() {
 }
 
 async function upgrade() {
-  const u = new DenoLand("https://deno.land/x/up@0.x/main.ts");
+  const u = new DenoLand("https://deno.land/x/dd@0.x/main.ts");
   const latestVersion = (await u.versions())[0];
   const url = u.at(latestVersion);
   console.log(url);
@@ -75,11 +75,11 @@ async function main(args: string[]) {
     spinner.message = `Updating dependencies of ${depFiles.length} files...`;
   }
 
-  const options: UpOptions = { dryRun: a["dry-run"] };
-  const results: UpResult[] = [];
+  const options: DdOptions = { dryRun: a["dry-run"] };
+  const results: DdResult[] = [];
 
   await Promise.all(depFiles.map(async (filename) => {
-    results.push(...await up(filename, options));
+    results.push(...await dd(filename, options));
   }));
 
   spinner.stop();
