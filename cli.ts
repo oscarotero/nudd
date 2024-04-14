@@ -1,4 +1,10 @@
-import { colors, expandGlob, parseArgs, Spinner } from "./deps.ts";
+import {
+  colors,
+  expandGlob,
+  getLatestVersion,
+  parseArgs,
+  Spinner,
+} from "./deps.ts";
 import { nudd, NuddOptions, NuddResult } from "./mod.ts";
 import { DenoLand } from "./registry/denoland.ts";
 
@@ -18,45 +24,70 @@ Optional arguments:
 }
 
 function version() {
-  // FIXME this might be kinda a hacky way to do it...
-  const u = new DenoLand(import.meta.url);
   try {
-    console.log(u.version);
-  } catch (e) {
-    console.error(e);
+    const mod = new DenoLand(import.meta.url);
+    console.log(mod.version);
+  } catch {
+    // Local development
+    console.log(import.meta.url);
   }
 }
 
 async function upgrade() {
-  const u = new DenoLand("https://deno.land/x/nudd@0.x/main.ts");
-  const latestVersion = (await u.versions())[0];
-  const url = u.at(latestVersion);
-  console.log(url);
+  const mod = new DenoLand(import.meta.url);
+  const latestVersion = getLatestVersion(await mod.versions());
 
-  // TODO;
+  if (mod.version === latestVersion) {
+    console.log("Already latest version.");
+    return;
+  }
+
+  const cmd = new Deno.Command(Deno.execPath(), {
+    args: [
+      "install",
+      "--allow-run",
+      "--allow-read",
+      "--allow-write",
+      "--allow-net",
+      "--name",
+      "nudd",
+      "--force",
+      "--reload",
+      "--global",
+      mod.at(latestVersion),
+    ],
+    stdin: "inherit",
+    stdout: "inherit",
+    stderr: "inherit",
+  });
+
+  await cmd.output();
 }
 
 async function main(args: string[]) {
-  console.log(args);
   const a = parseArgs(args, {
-    boolean: ["dry-run", "h", "help", "upgrade", "version"],
+    boolean: ["dry-run", "help", "upgrade", "version"],
+    alias: {
+      h: "help",
+      v: "version",
+    },
   });
 
-  if (a.h || a.help) {
-    return help();
-  }
   if (a.upgrade) {
     return await upgrade();
   }
   if (a.version) {
     return version();
   }
+  if (a.help || a._.length === 0) {
+    return help();
+  }
 
   const spinner = new Spinner({ message: "Scanning files..." });
   spinner.start();
-  console.log(spinner);
+
   const depFiles: string[] = [];
-  console.log(depFiles);
+
   for (const arg of a._.map((x) => x.toString())) {
     for await (const file of expandGlob(arg)) {
       depFiles.push(file.path);
@@ -107,6 +138,5 @@ async function main(args: string[]) {
 }
 
 if (import.meta.main) {
-  console.log("main");
   await main(Deno.args);
 }
