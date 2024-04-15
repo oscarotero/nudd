@@ -3,8 +3,8 @@
 Run this script to update your Deno dependencies to their latest published
 versions. This package is a fork of the original
 [deno-udd](https://github.com/hayd/deno-udd) package created from
-[Andy Hayden](https://github.com/hayd) with significant changes and
-renamed to `nudd` (New Udd).
+[Andy Hayden](https://github.com/hayd) with significant changes and renamed to
+`nudd` (New Udd).
 
 The biggest differences from the original package are:
 
