@@ -1,0 +1,30 @@
+{
+  "imports": {
+    "gh": "https://raw.githubusercontent.com/foo/bar/0.2.0/mod.ts",
+    "pax": "https://pax.deno.dev/foo/bar@0.2.0/mod.ts",
+    "pkg": "https://denopkg.com/foo/bar@0.2.0/mod.ts",
+    "esm": "https://esm.sh/foo-bar@0.2.0/mod.ts",
+    "@esm": "https://esm.sh/@foo/bar@0.2.0/mod.ts",
+    "gitlab": "https://gitlab.com/foo/bar/-/raw/0.2.0/mod.ts",
+    "jsdelivr": "https://cdn.jsdelivr.net/gh/foo/bar@0.2.0/mod.ts",
+    "jspm": "https://dev.jspm.io/npm:foo-bar@0.2.0",
+    "npm": "npm:foo-bar@0.2.0",
+    "npm/mod.ts": "npm:foo-bar@0.2.0/mod.ts",
+    "@npm": "npm:@foo/bar@0.2.0",
+    "@npm/mod.ts": "npm:@foo/bar@0.2.0/mod.ts",
+    "nest": "https://x.nest.land/foo-bar@0.2.0/mod.ts",
+    "skypack": "https://cdn.skypack.dev/foo-bar@0.2.0",
+    "skypack/mod.ts": "https://cdn.skypack.dev/@foo/bar@0.2.0/mod.ts",
+    "pika": "https://cdn.skypack.dev/foo-bar@0.2.0",
+    "pika/mod.ts": "https://cdn.skypack.dev/@foo/bar@0.2.0/mod.ts",
+    "unpkg": "https://unpkg.com/foo-bar@0.2.0",
+    "@unpkg": "https://unpkg.com/@foo/bar@0.2.0/mod.ts",
+    "https://unpkg.com/@foo/bar@0.1.0/mod.ts": "https://unpkg.com/@foo/bar@0.2.0/mod.ts"
+  },
+  "scopes": {
+    "https://unpkg.com/": {
+      "@unpkg": "https://unpkg.com/@foo/bar@0.1.0/mod.ts",
+      "https://unpkg.com/@foo/bar@0.1.0/mod.ts": "https://unpkg.com/@foo/bar@0.1.0/mod.ts"
+    }
+  }
+}

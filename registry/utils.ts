@@ -81,25 +81,3 @@ export function readJson(
   cache.set(url, item);
   return item;
 }
-
-export function importUrls(
-  content: string,
-  registries: RegistryCtor[],
-): RegistryUrl[] {
-  const urls: RegistryUrl[] = [];
-
-  for (const R of registries) {
-    const allRegexp = R.regexp.map((r) =>
-      new RegExp(`['"]${r.source}['"]`, "g")
-    );
-
-    for (const regexp of allRegexp) {
-      const match = content.match(regexp);
-      match?.forEach((url) =>
-        urls.push(new R(url.replace(/['"]/g, "") as string))
-      );
-    }
-  }
-
-  return urls;
-}

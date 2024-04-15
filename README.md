@@ -9,9 +9,12 @@ renamed to `nudd` (New Udd).
 The biggest differences from the original package are:
 
 - Updated dependencies and Deno API. Most code has been refactored.
+- Speed improved by updating dependencies concurrently.
 - Nudd only updates to stable versions.
 - Nudd only updates to the latest version (removed fragment feature).
 - Removed `--test` feature.
+- Added support for `.json` files (import maps).
+- Added support for jsr.io modules.
 
 ## Install
 

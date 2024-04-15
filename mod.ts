@@ -1,5 +1,5 @@
 import { getLatestVersion, parse } from "./deps.ts";
-import { importUrls, RegistryUrl } from "./registry/utils.ts";
+import { RegistryUrl } from "./registry/utils.ts";
 import { DenoLand } from "./registry/denoland.ts";
 import { JsDelivr } from "./registry/jsdelivr.ts";
 import { Npm } from "./registry/npm.ts";
@@ -12,6 +12,7 @@ import { NestLand } from "./registry/nestland.ts";
 import { Jspm } from "./registry/jspm.ts";
 import { Denopkg } from "./registry/denopkg.ts";
 import { PaxDeno } from "./registry/paxdeno.ts";
+import { Jsr } from "./registry/jsr.ts";
 
 const registries = [
   DenoLand,
@@ -26,6 +27,7 @@ const registries = [
   JsDelivr,
   NestLand,
   Npm,
+  Jsr,
 ];
 
 export interface NuddOptions {
@@ -43,9 +45,20 @@ export async function nudd(
   filename: string,
   options: NuddOptions,
 ): Promise<NuddResult[]> {
+  if (filename.endsWith(".json")) {
+    return await updateImportMap(filename, options);
+  }
+
+  return await updateCode(filename, options);
+}
+
+async function updateCode(
+  filename: string,
+  options: NuddOptions,
+): Promise<NuddResult[]> {
   let content: string = Deno.readTextFileSync(filename);
   let changed = false;
-  const urls: RegistryUrl[] = importUrls(content, registries);
+  const urls: RegistryUrl[] = codeUrls(content);
 
   // from a url we need to extract the current version
   const results: NuddResult[] = [];
@@ -86,4 +99,66 @@ export async function nudd(
   }
 
   return results;
+}
+
+interface ImportMap {
+  imports?: Record<string, string>;
+}
+
+async function updateImportMap(
+  filename: string,
+  options: NuddOptions,
+): Promise<NuddResult[]> {
+  const content: string = Deno.readTextFileSync(filename);
+  const json = JSON.parse(content) as ImportMap;
+  const results: NuddResult[] = [];
+  let changed = false;
+
+  if (!json.imports) {
+    return results;
+  }
+
+  for (const [key, initUrl] of Object.entries(json.imports)) {
+    for (const R of registries) {
+      if (R.regexp.some((r) => r.test(initUrl))) {
+        const v = new R(initUrl);
+        const newVersion = getLatestVersion(await v.versions());
+
+        if (v.version !== newVersion && !options.dryRun) {
+          json.imports[key] = v.at(newVersion);
+          results.push({ initUrl, initVersion: v.version, newVersion });
+          changed = true;
+          break;
+        }
+
+        results.push({ initUrl, initVersion: v.version });
+        break;
+      }
+    }
+  }
+
+  if (changed) {
+    Deno.writeTextFileSync(filename, JSON.stringify(json, null, 2) + "\n");
+  }
+
+  return results;
+}
+
+function codeUrls(content: string): RegistryUrl[] {
+  const urls: RegistryUrl[] = [];
+
+  for (const R of registries) {
+    const allRegexp = R.regexp.map((r) =>
+      new RegExp(`['"]${r.source}['"]`, "g")
+    );
+
+    for (const regexp of allRegexp) {
+      const match = content.match(regexp);
+      match?.forEach((url) =>
+        urls.push(new R(url.replace(/['"]/g, "") as string))
+      );
+    }
+  }
+
+  return urls;
 }

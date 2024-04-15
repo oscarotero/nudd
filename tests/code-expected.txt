@@ -17,3 +17,5 @@ import "https://cdn.skypack.dev/foo-bar@0.2.0";
 import "https://cdn.skypack.dev/@foo/bar@0.2.0/mod.ts";
 import "https://unpkg.com/foo-bar@0.2.0";
 import "https://unpkg.com/@foo/bar@0.2.0/mod.ts";
+import "jsr:@foo/bar@0.2.0";
+import "jsr:@foo/bar@0.2.0/mod.ts";

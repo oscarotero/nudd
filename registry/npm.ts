@@ -1,10 +1,8 @@
 import { readJson, RegistryUrl } from "./utils.ts";
 
-const parseRegex = /^npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^/]+))?(.*)/;
-
 export class Npm extends RegistryUrl {
   static regexp = [
-    /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@([^/"']+))?[^'"]*/,
+    /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@[^/"']+)?[^'"]*/,
   ];
 
   async versions(): Promise<string[]> {
@@ -12,8 +10,7 @@ export class Npm extends RegistryUrl {
   }
 
   at(version: string): string {
-    const [, name, _, files] = this.url.match(parseRegex)!;
-    return `npm:${name}@${version}${files}`;
+    return `npm:${this.name}@${version}${this.file}`;
   }
 }
 

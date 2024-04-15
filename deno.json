@@ -1,7 +1,8 @@
 {
   "lock": false,
   "tasks": {
-    "test": "deno test --allow-run --allow-read --allow-write tests/test.ts"
+    "test": "deno test --allow-run --allow-read --allow-write tests/test.ts",
+    "update-deps": "deno run -A ./cli.ts deps.ts tests/tests.ts"
   },
   "fmt": {
     "exclude": ["CHANGELOG.md"]
