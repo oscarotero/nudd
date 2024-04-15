@@ -19,7 +19,13 @@ The biggest differences from the original package are:
 ## Install
 
 ```sh
-deno install --allow-read --allow-write --allow-net -fr --name nudd https://deno.land/x/nudd/cli.ts
+deno install --allow-run --allow-read --allow-write --allow-net --name nudd --force --global https://deno.land/x/nudd/cli.ts
+```
+
+To update:
+
+```sh
+nudd --upgrade
 ```
 
 ## Usage
