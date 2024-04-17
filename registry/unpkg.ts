@@ -10,7 +10,7 @@ export class Unpkg extends RegistryUrl {
     return await npmVersions(this.name);
   }
 
-  at(version: string): string {
-    return `https://unpkg.com/${this.name}@${version}${this.file}`;
+  at(version = this.version, file = this.file): string {
+    return `https://unpkg.com/${this.name}@${version}${file}`;
   }
 }

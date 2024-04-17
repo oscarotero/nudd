@@ -39,14 +39,14 @@ export abstract class RegistryUrl {
       };
     }
 
-    throw new Error(`Unable to parse version in ${this.url}`);
+    throw new Error(`Unable to parse ${this.url}`);
   }
 
   /** Returns all available versions */
   abstract versions(): Promise<string[]>;
 
-  /** Returns a URL with a specific version */
-  abstract at(version: string): string;
+  /** Returns a URL with a specific version/file */
+  abstract at(version?: string, file?: string): string;
 }
 
 export interface RegistryCtor {

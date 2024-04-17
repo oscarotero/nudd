@@ -12,7 +12,7 @@ export class PaxDeno extends RegistryUrl {
     return await githubVersions(this.name);
   }
 
-  at(version: string): string {
-    return `https://pax.deno.dev/${this.name}@${version}${this.file}`;
+  at(version = this.version, file = this.file): string {
+    return `https://pax.deno.dev/${this.name}@${version}${file}`;
   }
 }

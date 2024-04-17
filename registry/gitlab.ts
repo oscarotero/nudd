@@ -30,7 +30,7 @@ export class GitlabRaw extends RegistryUrl {
     );
   }
 
-  at(version: string): string {
-    return `https://gitlab.com/${this.name}/-/raw/${version}${this.file}`;
+  at(version = this.version, file = this.file): string {
+    return `https://gitlab.com/${this.name}/-/raw/${version}${file}`;
   }
 }

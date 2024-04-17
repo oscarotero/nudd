@@ -14,7 +14,7 @@ export class JsDelivr extends RegistryUrl {
     return githubVersions(this.name);
   }
 
-  at(version: string): string {
-    return `https://cdn.jsdelivr.net/gh/${this.name}@${version}${this.file}`;
+  at(version = this.version, file = this.file): string {
+    return `https://cdn.jsdelivr.net/gh/${this.name}@${version}${file}`;
   }
 }

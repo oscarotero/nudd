@@ -12,7 +12,7 @@ export class Denopkg extends RegistryUrl {
     return await githubVersions(this.name);
   }
 
-  at(version: string): string {
-    return `https://denopkg.com/${this.name}@${version}${this.file}`;
+  at(version = this.version, file = this.file): string {
+    return `https://denopkg.com/${this.name}@${version}${file}`;
   }
 }

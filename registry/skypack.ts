@@ -13,7 +13,7 @@ export class Skypack extends RegistryUrl {
     return await npmVersions(this.name);
   }
 
-  at(version: string): string {
-    return `https://cdn.skypack.dev/${this.name}@${version}${this.file}`;
+  at(version = this.version, file = this.file): string {
+    return `https://cdn.skypack.dev/${this.name}@${version}${file}`;
   }
 }

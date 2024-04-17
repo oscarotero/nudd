@@ -17,11 +17,11 @@ export class DenoLand extends RegistryUrl {
     });
   }
 
-  at(version: string): string {
+  at(version = this.version, file = this.file): string {
     if (this.name === "std") {
-      return `https://deno.land/${this.name}@${version}${this.file}`;
+      return `https://deno.land/${this.name}@${version}${file}`;
     }
 
-    return `https://deno.land/x/${this.name}@${version}${this.file}`;
+    return `https://deno.land/x/${this.name}@${version}${file}`;
   }
 }

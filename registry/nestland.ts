@@ -17,7 +17,7 @@ export class NestLand extends RegistryUrl {
     );
   }
 
-  at(version: string): string {
-    return `https://x.nest.land/${this.name}@${version}${this.file}`;
+  at(version = this.version, file = this.file): string {
+    return `https://x.nest.land/${this.name}@${version}${file}`;
   }
 }
