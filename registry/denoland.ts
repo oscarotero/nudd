@@ -1,9 +1,13 @@
-import { readJson, RegistryUrl } from "./utils.ts";
+import { parse, readJson, RegistryUrl } from "./utils.ts";
 
 export class DenoLand extends RegistryUrl {
   static regexp = [
     /https?:\/\/deno.land\/(?:std\@[^'"]*|x\/[^/"']*?\@[^'"]*)/,
   ];
+
+  static parse(url: string): DenoLand {
+    return parse(DenoLand, url);
+  }
 
   async versions(): Promise<string[]> {
     const name = this.name;

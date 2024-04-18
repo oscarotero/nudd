@@ -1,11 +1,11 @@
-import { RegistryUrl } from "./utils.ts";
+import { parse, RegistryUrl } from "./utils.ts";
 import { githubVersions } from "./github.ts";
 
 export class Denopkg extends RegistryUrl {
   static regexp = [/https?:\/\/denopkg.com\/[^/"']*?\/[^/"']*?\@[^'"]*/];
 
-  parse() {
-    return super.parse(false);
+  static parse(url: string): Denopkg {
+    return parse(Denopkg, url, false);
   }
 
   async versions(): Promise<string[]> {

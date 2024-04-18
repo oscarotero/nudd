@@ -1,4 +1,4 @@
-import { RegistryUrl } from "./utils.ts";
+import { parse, RegistryUrl } from "./utils.ts";
 import { githubVersions } from "./github.ts";
 
 export class JsDelivr extends RegistryUrl {
@@ -6,8 +6,8 @@ export class JsDelivr extends RegistryUrl {
     /https?:\/\/cdn\.jsdelivr\.net\/gh\/[^/"']+\/[^/"']+@(?!master)[^/"']+\/[^'"]*/,
   ];
 
-  parse() {
-    return super.parse(false);
+  static parse(url: string): JsDelivr {
+    return parse(JsDelivr, url, false);
   }
 
   versions(): Promise<string[]> {

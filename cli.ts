@@ -5,7 +5,7 @@ import {
   parseArgs,
   Spinner,
 } from "./deps.ts";
-import { nudd, NuddOptions, NuddResult } from "./mod.ts";
+import { update, UpdateOptions, UpdateResult } from "./update.ts";
 import { DenoLand } from "./registry/denoland.ts";
 
 function help() {
@@ -106,11 +106,11 @@ async function main(args: string[]) {
     spinner.message = `Updating dependencies of ${depFiles.length} files...`;
   }
 
-  const options: NuddOptions = { dryRun: a["dry-run"] };
-  const results: NuddResult[] = [];
+  const options: UpdateOptions = { dryRun: a["dry-run"] };
+  const results: UpdateResult[] = [];
 
   await Promise.all(depFiles.map(async (filename) => {
-    results.push(...await nudd(filename, options));
+    results.push(...await update(filename, options));
   }));
 
   spinner.stop();

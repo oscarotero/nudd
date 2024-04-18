@@ -1,45 +1,14 @@
 export abstract class RegistryUrl {
-  url: string;
+  url?: string;
   version: string;
   name: string;
   file: string;
 
-  constructor(url: string) {
-    this.url = url;
-
-    const { version, name, file } = this.parse();
-
-    this.version = version;
-    this.name = name;
-    this.file = file;
-  }
-
-  parse(atScope = true): ParseResult {
-    // Scoped
-    let match = atScope
-      ? this.url.match(/[/:](@[^/:]+)\/([^/:]+)@([^/]+)(.*)$/)
-      : this.url.match(/[/:]([^/:]+)\/([^/:]+)@([^/]+)(.*)$/);
-
-    if (match) {
-      return {
-        version: match[3],
-        name: `${match[1]}/${match[2]}`,
-        file: match[4],
-      };
-    }
-
-    // Unscoped
-    match = this.url.match(/[/:]([^/:]+)@([^/]+)(.*)$/);
-
-    if (match) {
-      return {
-        version: match[2],
-        name: match[1],
-        file: match[3],
-      };
-    }
-
-    throw new Error(`Unable to parse ${this.url}`);
+  constructor(data: ParseResult) {
+    this.url = data.url;
+    this.version = data.version;
+    this.name = data.name;
+    this.file = data.file;
   }
 
   /** Returns all available versions */
@@ -49,12 +18,48 @@ export abstract class RegistryUrl {
   abstract at(version?: string, file?: string): string;
 }
 
+export function parse(
+  ctor: RegistryCtor,
+  url: string,
+  atScope = true,
+): RegistryUrl {
+  // Scoped
+  let match = atScope
+    ? url.match(/[/:](@[^/:]+)\/([^/:]+)@([^/]+)(.*)$/)
+    : url.match(/[/:]([^/:]+)\/([^/:]+)@([^/]+)(.*)$/);
+
+  if (match) {
+    return new ctor({
+      url,
+      version: match[3],
+      name: `${match[1]}/${match[2]}`,
+      file: match[4],
+    });
+  }
+
+  // Unscoped
+  match = url.match(/[/:]([^/:]+)@([^/]+)(.*)$/);
+
+  if (match) {
+    return new ctor({
+      url,
+      version: match[2],
+      name: match[1],
+      file: match[3],
+    });
+  }
+
+  throw new Error(`Unable to parse ${url}`);
+}
+
 export interface RegistryCtor {
-  new (url: string): RegistryUrl;
+  new (data: ParseResult): RegistryUrl;
+  parse(url: string): RegistryUrl;
   regexp: RegExp[];
 }
 
 export interface ParseResult {
+  url?: string;
   version: string;
   name: string;
   file: string;

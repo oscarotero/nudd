@@ -1,4 +1,4 @@
-import { RegistryUrl } from "./utils.ts";
+import { parse, RegistryUrl } from "./utils.ts";
 import { npmVersions } from "./npm.ts";
 
 export class EsmSh extends RegistryUrl {
@@ -6,6 +6,10 @@ export class EsmSh extends RegistryUrl {
     /https?:\/\/esm.sh\/[^/"']*?\@[^'"]*/,
     /https?:\/\/esm\.sh\/@[^/"']*?\/[^/"']*?\@[^'"]*/,
   ];
+
+  static parse(url: string): EsmSh {
+    return parse(EsmSh, url);
+  }
 
   async versions(): Promise<string[]> {
     return await npmVersions(this.name);

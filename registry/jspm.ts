@@ -1,4 +1,4 @@
-import { RegistryUrl } from "./utils.ts";
+import { parse, RegistryUrl } from "./utils.ts";
 import { npmVersions } from "./npm.ts";
 
 export class Jspm extends RegistryUrl {
@@ -6,6 +6,10 @@ export class Jspm extends RegistryUrl {
     /https?:\/\/dev.jspm.io\/npm:[^/"']*?\@[^'"]*/,
     /https?:\/\/jspm.dev\/[^/"']*?\@[^'"]*/,
   ];
+
+  static parse(url: string): Jspm {
+    return parse(Jspm, url);
+  }
 
   async versions(): Promise<string[]> {
     return await npmVersions(this.name);

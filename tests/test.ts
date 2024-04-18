@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.222.1/assert/assert_equals.ts";
 import { cache } from "../registry/utils.ts";
-import { nudd } from "../mod.ts";
+import { update } from "../update.ts";
 
 const versions = Promise.resolve(["0.2.0"]);
 
@@ -18,7 +18,7 @@ cache.set("https://jsr.io/@foo/bar/meta.json", versions);
 Deno.test("Update dependencies in code", async () => {
   await Deno.copyFile("tests/code.txt", "tests/code-tmp.txt");
 
-  await nudd("tests/code-tmp.txt", { dryRun: false });
+  await update("tests/code-tmp.txt", { dryRun: false });
 
   const result = await Deno.readTextFile("tests/code-tmp.txt");
   const expected = await Deno.readTextFile("tests/code-expected.txt");
@@ -29,7 +29,7 @@ Deno.test("Update dependencies in code", async () => {
 Deno.test("Update dependencies in import maps", async () => {
   await Deno.copyFile("tests/import-map.json", "tests/import-map-tmp.json");
 
-  await nudd("tests/import-map-tmp.json", { dryRun: false });
+  await update("tests/import-map-tmp.json", { dryRun: false });
 
   const result = await Deno.readTextFile("tests/import-map-tmp.json");
   const expected = await Deno.readTextFile("tests/import-map-expected.json");

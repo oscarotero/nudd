@@ -1,4 +1,4 @@
-import { ParseResult, readJson, RegistryUrl } from "./utils.ts";
+import { parse, readJson, RegistryUrl } from "./utils.ts";
 
 export class Jsr extends RegistryUrl {
   static regexp = [
@@ -6,21 +6,22 @@ export class Jsr extends RegistryUrl {
     /https:\/\/jsr\.io\/\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"]*/,
   ];
 
-  parse(): ParseResult {
-    if (this.url.startsWith("https:")) {
-      const match = this.url.match(/(@[^/]+\/[^/]+)\/([^/]+)(.*)$/);
+  static parse(url: string): Jsr {
+    if (url.startsWith("https:")) {
+      const match = url.match(/(@[^/]+\/[^/]+)\/([^/]+)(.*)$/);
 
       if (!match) {
-        throw new Error(`Unable to parse ${this.url}`);
+        throw new Error(`Unable to parse ${url}`);
       }
 
-      return {
+      return new Jsr({
+        url,
         version: match[2],
         name: match[1],
         file: match[3],
-      };
+      });
     }
-    return super.parse();
+    return parse(Jsr, url);
   }
 
   async versions(): Promise<string[]> {

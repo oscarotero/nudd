@@ -1,5 +1,5 @@
 import { getLatestVersion, parse } from "./deps.ts";
-import { RegistryUrl } from "./registry/utils.ts";
+import { RegistryCtor, RegistryUrl } from "./registry/utils.ts";
 import { DenoLand } from "./registry/denoland.ts";
 import { JsDelivr } from "./registry/jsdelivr.ts";
 import { Npm } from "./registry/npm.ts";
@@ -14,7 +14,7 @@ import { Denopkg } from "./registry/denopkg.ts";
 import { PaxDeno } from "./registry/paxdeno.ts";
 import { Jsr } from "./registry/jsr.ts";
 
-const registries = [
+const registries: RegistryCtor[] = [
   DenoLand,
   Unpkg,
   Denopkg,
@@ -30,21 +30,21 @@ const registries = [
   Jsr,
 ];
 
-export interface NuddOptions {
+export interface UpdateOptions {
   // don't permanently edit files
   dryRun?: boolean;
 }
 
-export interface NuddResult {
+export interface UpdateResult {
   initUrl: string;
   initVersion: string;
   newVersion?: string;
 }
 
-export async function nudd(
+export async function update(
   filename: string,
-  options: NuddOptions,
-): Promise<NuddResult[]> {
+  options: UpdateOptions,
+): Promise<UpdateResult[]> {
   if (filename.endsWith(".json")) {
     return await updateImportMap(filename, options);
   }
@@ -54,17 +54,17 @@ export async function nudd(
 
 async function updateCode(
   filename: string,
-  options: NuddOptions,
-): Promise<NuddResult[]> {
+  options: UpdateOptions,
+): Promise<UpdateResult[]> {
   let content: string = Deno.readTextFileSync(filename);
   let changed = false;
   const urls: RegistryUrl[] = codeUrls(content);
 
   // from a url we need to extract the current version
-  const results: NuddResult[] = [];
+  const results: UpdateResult[] = [];
 
   for (const v of urls) {
-    const initUrl: string = v.url;
+    const initUrl: string = v.url!;
     const initVersion: string = v.version;
 
     try {
@@ -107,11 +107,11 @@ interface ImportMap {
 
 async function updateImportMap(
   filename: string,
-  options: NuddOptions,
-): Promise<NuddResult[]> {
+  options: UpdateOptions,
+): Promise<UpdateResult[]> {
   const content: string = Deno.readTextFileSync(filename);
   const json = JSON.parse(content) as ImportMap;
-  const results: NuddResult[] = [];
+  const results: UpdateResult[] = [];
   let changed = false;
 
   if (!json.imports) {
@@ -121,7 +121,7 @@ async function updateImportMap(
   for (const [key, initUrl] of Object.entries(json.imports)) {
     for (const R of registries) {
       if (R.regexp.some((r) => r.test(initUrl))) {
-        const v = new R(initUrl);
+        const v = R.parse(initUrl);
         const newVersion = getLatestVersion(await v.versions());
 
         if (v.version !== newVersion && !options.dryRun) {
@@ -155,7 +155,7 @@ function codeUrls(content: string): RegistryUrl[] {
     for (const regexp of allRegexp) {
       const match = content.match(regexp);
       match?.forEach((url) =>
-        urls.push(new R(url.replace(/['"]/g, "") as string))
+        urls.push(R.parse(url.replace(/['"]/g, "") as string))
       );
     }
   }

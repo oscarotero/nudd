@@ -1,11 +1,11 @@
-import { RegistryUrl } from "./utils.ts";
+import { parse, RegistryUrl } from "./utils.ts";
 import { githubVersions } from "./github.ts";
 
 export class PaxDeno extends RegistryUrl {
   static regexp = [/https?:\/\/pax.deno.dev\/[^/"']*?\/[^/"']*?\@[^'"]*/];
 
-  parse() {
-    return super.parse(false);
+  static parse(url: string): PaxDeno {
+    return parse(PaxDeno, url, false);
   }
 
   async versions(): Promise<string[]> {

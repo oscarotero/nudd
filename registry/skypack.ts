@@ -1,4 +1,4 @@
-import { RegistryUrl } from "./utils.ts";
+import { parse, RegistryUrl } from "./utils.ts";
 import { npmVersions } from "./npm.ts";
 
 export class Skypack extends RegistryUrl {
@@ -8,6 +8,10 @@ export class Skypack extends RegistryUrl {
     /https?:\/\/cdn.pika.dev(\/\_)?\/[^/"']*?\@[^'"]*/,
     /https?:\/\/cdn\.pika\.dev(\/\_)?\/@[^/"']*?\/[^/"']*?\@[^'"]*/,
   ];
+
+  static parse(url: string): Skypack {
+    return parse(Skypack, url);
+  }
 
   async versions(): Promise<string[]> {
     return await npmVersions(this.name);

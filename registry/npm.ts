@@ -1,9 +1,13 @@
-import { readJson, RegistryUrl } from "./utils.ts";
+import { parse, readJson, RegistryUrl } from "./utils.ts";
 
 export class Npm extends RegistryUrl {
   static regexp = [
     /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@[^/"']+)?[^'"]*/,
   ];
+
+  static parse(url: string): Npm {
+    return parse(Npm, url);
+  }
 
   async versions(): Promise<string[]> {
     return await npmVersions(this.name);

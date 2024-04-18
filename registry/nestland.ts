@@ -1,9 +1,13 @@
-import { readJson, RegistryUrl } from "./utils.ts";
+import { parse, readJson, RegistryUrl } from "./utils.ts";
 
 export class NestLand extends RegistryUrl {
   static regexp = [
     /https?:\/\/x\.nest\.land\/[^/"']+@(?!master)[^/"']+\/[^'"]*/,
   ];
+
+  static parse(url: string): NestLand {
+    return parse(NestLand, url);
+  }
 
   async versions(): Promise<string[]> {
     const url = `https://x.nest.land/api/package/${this.name}`;

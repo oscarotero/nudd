@@ -1,23 +1,24 @@
-import { ParseResult, readJson, RegistryUrl } from "./utils.ts";
+import { readJson, RegistryUrl } from "./utils.ts";
 
 export class GithubRaw extends RegistryUrl {
   static regexp = [
     /https?:\/\/raw\.githubusercontent\.com\/[^/"']+\/[^/"']+\/(?!master)[^/"']+\/[^'"]*/,
   ];
 
-  parse(): ParseResult {
-    const match = this.url.match(
+  static parse(url: string): GithubRaw {
+    const match = url.match(
       /https?:\/\/raw\.githubusercontent\.com\/([^/]+\/[^/]+)\/([^/]+)(.*)/,
     );
 
     if (match === null) {
-      throw new Error(`Unable to parse ${this.url}`);
+      throw new Error(`Unable to parse ${url}`);
     }
-    return {
+    return new GithubRaw({
+      url,
       name: match[1],
       version: match[2],
       file: match[3],
-    };
+    });
   }
 
   versions(): Promise<string[]> {
