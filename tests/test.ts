@@ -1,6 +1,6 @@
 import { assertEquals } from "https://deno.land/std@0.222.1/assert/assert_equals.ts";
 import { cache } from "../registry/utils.ts";
-import { update } from "../update.ts";
+import { update } from "../commands/update.ts";
 
 const versions = Promise.resolve(["0.2.0"]);
 

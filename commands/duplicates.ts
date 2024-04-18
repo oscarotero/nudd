@@ -90,12 +90,14 @@ export default async function (filename: string, options: DuplicatesOptions) {
   spinner.stop();
   const duplicates: Duplicates[] = [];
 
-  for (const [regName, registry] of Object.entries(graph)) {
+  for (const [regName, registry] of Object.entries(graph.remote)) {
     for (const [pkgName, pkg] of Object.entries(registry)) {
       if (Object.keys(pkg).length === 1) {
         continue;
       }
+
       const versions: DuplicatedVersion[] = [];
+
       for (const [verName, version] of Object.entries(pkg)) {
         const dependents = findDependent(version.specifier, graph);
         versions.push({
@@ -104,6 +106,7 @@ export default async function (filename: string, options: DuplicatesOptions) {
           dependents,
         });
       }
+
       duplicates.push({ registry: regName, name: pkgName, versions });
     }
   }
@@ -115,30 +118,37 @@ export default async function (filename: string, options: DuplicatesOptions) {
 
   console.log("Duplicates found:");
 
-  for (const duplicate of duplicates) {
-    console.log(
-      `  ${colors.yellow(duplicate.name)} ${colors.dim(duplicate.registry)}`,
-    );
-
-    for (const version of duplicate.versions) {
-      console.log(colors.red(`    ${version.version}`));
-      for (const dependent of version.dependents) {
-        console.log(`      from ${colors.dim(dependent)}`);
-      }
-    }
-  }
-
   const importMap = await loadImportMap();
   const scopes = importMap.scopes ??= {};
 
-  for (const dup of duplicates) {
-    const latest = getLatestVersion(dup.versions.map((v) => v.version));
-    const specifier = dup.versions.find((v) => v.version === latest)!.specifier;
+  for (const duplicate of duplicates) {
+    const latest = getLatestVersion(duplicate.versions.map((v) => v.version));
+    const specifier = duplicate.versions.find((v) =>
+      v.version === latest
+    )!.specifier;
 
-    for (const version of dup.versions) {
+    console.log();
+    console.log(
+      `${colors.yellow(duplicate.name)} ${
+        colors.dim(`(${duplicate.registry.toLocaleLowerCase()})`)
+      }`,
+    );
+
+    for (const version of duplicate.versions) {
+      if (version.version === latest) {
+        console.log(" -", colors.green(version.version));
+      } else {
+        console.log(" -", colors.red(version.version));
+      }
+
+      for (const dependent of version.dependents) {
+        console.log(`   ${colors.dim(dependent)}`);
+      }
+
       if (version.version === latest) {
         continue;
       }
+
       for (const dep of version.dependents) {
         const scope = scopes[dep] ??= {};
         scope[version.specifier] = specifier;
@@ -152,7 +162,7 @@ export default async function (filename: string, options: DuplicatesOptions) {
   } else {
     console.log();
     console.log(
-      "To remove duplicates, update the import map with the code below:",
+      "To fix duplicates, update the import map with the code below:",
     );
     console.log();
     console.log(colors.gray(JSON.stringify(importMap, null, 2)));
@@ -166,13 +176,19 @@ export default async function (filename: string, options: DuplicatesOptions) {
 function findDependent(id: string, graph: Graph): string[] {
   const dependents: string[] = [];
 
-  for (const registry of Object.values(graph)) {
+  for (const registry of Object.values(graph.remote)) {
     for (const pkg of Object.values(registry)) {
       for (const version of Object.values(pkg)) {
         if (version.dependencies.has(id)) {
           dependents.push(version.specifier);
         }
       }
+    }
+  }
+
+  for (const [specifier, dependencies] of Object.entries(graph.local)) {
+    if (dependencies.includes(id)) {
+      dependents.push(specifier);
     }
   }
 
@@ -187,7 +203,10 @@ async function getInfo(name: string): Promise<Info> {
   const result = await command.output();
   return JSON.parse(new TextDecoder().decode(result.stdout)) as Info;
 }
-type Graph = Record<string, Registry>;
+interface Graph {
+  remote: Record<string, Registry>;
+  local: Record<string, string[]>;
+}
 type Registry = Record<string, Package>;
 type Package = Record<string, Version>;
 interface Version {
@@ -196,9 +215,27 @@ interface Version {
 }
 
 function buildGraph(info: Info): Graph {
-  const graph: Graph = {};
+  const graph: Graph = {
+    remote: {},
+    local: {},
+  };
 
   for (const module of info.modules) {
+    // Local modules
+    if (module.specifier.startsWith("file:")) {
+      module.dependencies?.filter((d) => !d.specifier.startsWith("."))
+        .forEach((d) => {
+          const specifier = getRegistry(
+            d.code?.specifier || d.type?.specifier!,
+          );
+          if (specifier) {
+            graph.local[module.specifier] ??= [];
+            graph.local[module.specifier].push(getId(specifier));
+          }
+        });
+      continue;
+    }
+
     const reg = getRegistry(module.specifier);
 
     if (!reg) {
@@ -206,8 +243,9 @@ function buildGraph(info: Info): Graph {
     }
 
     const registryId = reg.constructor.name;
-    const registry = graph[registryId] ??= {};
+    const registry = graph.remote[registryId] ??= {};
     const pkg = registry[reg.name] ??= {};
+
     const version = pkg[reg.version] ??= {
       specifier: getId(reg),
       dependencies: new Set(),
@@ -228,7 +266,7 @@ function buildGraph(info: Info): Graph {
       name: npmPackage.name,
       version: npmPackage.version,
     });
-    const registry = graph.Npm ??= {};
+    const registry = graph.remote.Npm ??= {};
     const pkg = registry[reg.name] ??= {};
     const version = pkg[reg.version] ??= {
       specifier: getId(reg),
@@ -258,7 +296,7 @@ function getRegistry(url: string): RegistryUrl | undefined {
     }
   }
 
-  throw new Error("Unable to find registry for " + url);
+  // console.log("Unable to find registry for " + url);
 }
 
 function getNpmCanonical(url: string): string {
