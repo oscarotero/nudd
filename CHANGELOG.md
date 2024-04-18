@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Allow to change the file path in `Registry.at()`.
 - Support for `https://jspm.dev/` urls.
 - Support for `https://jsr.io/` urls.
+- Added `duplicates` command.
+
+### Fixed
+- Updated dependencies
 
 ## [0.1.2] - 2024-04-15
 ### Added

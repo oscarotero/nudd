@@ -1,11 +1,6 @@
-import {
-  colors,
-  expandGlob,
-  getLatestVersion,
-  parseArgs,
-  Spinner,
-} from "./deps.ts";
-import { update, UpdateOptions, UpdateResult } from "./update.ts";
+import { getLatestVersion, parseArgs } from "./deps.ts";
+import updateCommand from "./commands/update.ts";
+import duplicatesCommand from "./commands/duplicates.ts";
 import { DenoLand } from "./registry/denoland.ts";
 
 function help() {
@@ -25,7 +20,7 @@ Optional arguments:
 
 function version() {
   try {
-    const mod = new DenoLand(import.meta.url);
+    const mod = DenoLand.parse(import.meta.url);
     console.log(mod.version);
   } catch {
     // Local development
@@ -34,7 +29,7 @@ function version() {
 }
 
 async function upgrade() {
-  const mod = new DenoLand(import.meta.url);
+  const mod = DenoLand.parse(import.meta.url);
   const latestVersion = getLatestVersion(await mod.versions());
 
   if (mod.version === latestVersion) {
@@ -76,65 +71,20 @@ async function main(args: string[]) {
   if (a.upgrade) {
     return await upgrade();
   }
+
   if (a.version) {
     return version();
   }
+
   if (a.help || a._.length === 0) {
     return help();
   }
 
-  const spinner = new Spinner({ message: "Scanning files..." });
-  spinner.start();
-
-  const depFiles: string[] = [];
-
-  for (const arg of a._.map((x) => x.toString())) {
-    for await (const file of expandGlob(arg)) {
-      depFiles.push(file.path);
-    }
+  if (a._[0] === "duplicates") {
+    return duplicatesCommand(a._[1] as string, { dryRun: a["dry-run"] });
   }
 
-  if (depFiles.length === 0) {
-    spinner.stop();
-    help();
-    Deno.exit(1);
-  }
-
-  if (depFiles.length === 1) {
-    spinner.message = `Updating dependencies of ${depFiles[0]}...`;
-  } else {
-    spinner.message = `Updating dependencies of ${depFiles.length} files...`;
-  }
-
-  const options: UpdateOptions = { dryRun: a["dry-run"] };
-  const results: UpdateResult[] = [];
-
-  await Promise.all(depFiles.map(async (filename) => {
-    results.push(...await update(filename, options));
-  }));
-
-  spinner.stop();
-
-  const alreadyLatest = results.filter((x) => x.newVersion === undefined);
-
-  if (alreadyLatest.length > 0) {
-    console.log(colors.bold("\nAlready latest version:"));
-    for (const a of alreadyLatest) {
-      console.log(colors.dim(a.initUrl), "==", a.initVersion);
-    }
-  }
-
-  const updated = results.filter((x) => x.newVersion !== undefined);
-  if (updated.length > 0) {
-    console.log(
-      colors.bold(
-        options.dryRun ? "\nAble to update:" : "\nSuccessfully updated:",
-      ),
-    );
-    for (const s of updated) {
-      console.log(colors.green(s.initUrl), s.initVersion, "->", s.newVersion);
-    }
-  }
+  return updateCommand(a._ as string[], { dryRun: a["dry-run"] });
 }
 
 if (import.meta.main) {

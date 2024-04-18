@@ -8,7 +8,7 @@ export abstract class RegistryUrl {
     this.url = data.url;
     this.version = data.version;
     this.name = data.name;
-    this.file = data.file;
+    this.file = data.file || "";
   }
 
   /** Returns all available versions */
@@ -62,7 +62,7 @@ export interface ParseResult {
   url?: string;
   version: string;
   name: string;
-  file: string;
+  file?: string;
 }
 
 export const cache: Map<string, Promise<string[]>> = new Map();
