@@ -33,7 +33,7 @@ export class GithubRaw extends Package {
 }
 
 export async function githubVersions(repo: string): Promise<string[]> {
-  const url = `https://api.github.com/repos/${repo}/tags`;
+  const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
   return await readJson(url, (json) =>
     // deno-lint-ignore no-explicit-any
     json.map((x: any) => x.name));

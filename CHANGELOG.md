@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Allow to change the file path in `Registry.at()`.
 - Support for `https://jspm.dev/` urls.
 - Support for `https://jsr.io/` urls.
+- Support for `https://deno.re/` urls.
 - Added `duplicates` command.
 
 ### Fixed

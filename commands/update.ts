@@ -7,6 +7,7 @@ import {
 } from "../deps.ts";
 import { Package, Registry } from "../registry/utils.ts";
 import { DenoLand } from "../registry/denoland.ts";
+import { DenoRe } from "../registry/denore.ts";
 import { JsDelivr } from "../registry/jsdelivr.ts";
 import { Npm } from "../registry/npm.ts";
 import { GithubRaw } from "../registry/github.ts";
@@ -24,6 +25,7 @@ const registries: Registry[] = [
   DenoLand,
   Unpkg,
   Denopkg,
+  DenoRe,
   PaxDeno,
   Jspm,
   Skypack,

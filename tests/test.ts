@@ -7,7 +7,7 @@ const versions = Promise.resolve(["0.2.0"]);
 cache.set("https://registry.deno.land/x/foo-bar/versions", versions);
 cache.set("https://registry.npmjs.org/foo-bar", versions);
 cache.set("https://registry.npmjs.org/@foo/bar", versions);
-cache.set("https://api.github.com/repos/foo/bar/tags", versions);
+cache.set("https://api.github.com/repos/foo/bar/tags?per_page=100", versions);
 cache.set(
   "https://gitlab.com/api/v4/projects/foo%2Fbar/repository/tags",
   versions,
