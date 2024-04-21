@@ -80,11 +80,11 @@ export default async function (filename: string, options: DuplicatesOptions) {
 
   const importMap = await loadImportMap();
   const info = await getInfo(filename);
-  const graph = buildGraph(info, importMap.imports);
+  const packages = getPackages(info, importMap.imports);
   spinner.stop();
 
   const before = JSON.stringify(importMap);
-  fixDuplicates(graph, importMap);
+  fixDuplicates(packages, importMap);
 
   if (before === JSON.stringify(importMap)) {
     console.log(colors.green("No duplicates found"));
@@ -109,11 +109,11 @@ export default async function (filename: string, options: DuplicatesOptions) {
 }
 
 /** Inspect a graph and detect duplicated versions of the same package */
-function fixDuplicates(graph: Graph, importMap: ImportMap) {
+function fixDuplicates(packages: Packages, importMap: ImportMap) {
   const versions = new Map<string, Map<string, Package>>();
 
   // Map all packages by type:name and version
-  for (const pkg of graph.packages.values()) {
+  for (const pkg of packages.values()) {
     const key = `${pkg.type}:${pkg.name}`;
 
     if (!versions.has(key)) {
@@ -140,10 +140,23 @@ function fixDuplicates(graph: Graph, importMap: ImportMap) {
         }
 
         console.log("  ", colors.red(semver));
-        pkg.dependents.forEach((dep) => {
-          console.log("    ", colors.dim(dep.id));
-          dep.imports ??= {};
-          dep.imports[pkg.url] = pkg.at(latestVersion);
+        pkg.dependents.forEach((dep, key) => {
+          if (importMap.imports?.[key]) {
+            console.log("    ", colors.dim(key));
+            importMap.imports ??= {};
+            const pkg = getPackage(importMap.imports[key], true);
+
+            if (!pkg) {
+              throw new Error(
+                `Unable to parse package ${importMap.imports[key]}`,
+              );
+            }
+            importMap.imports[key] = pkg.at(latestVersion);
+          } else {
+            console.log("    ", colors.dim(dep.id));
+            dep.imports ??= {};
+            dep.imports[pkg.url] = pkg.at(latestVersion);
+          }
         });
       }
     }
@@ -159,19 +172,23 @@ function fixDuplicates(graph: Graph, importMap: ImportMap) {
           continue;
         }
 
-        graph.packages.delete(pkg.id);
+        packages.delete(pkg.id);
       }
     }
   }
 
   // Get all scopes
   const scopes = importMap.scopes ??= {};
-  for (const pkg of graph.packages.values()) {
+  for (const pkg of packages.values()) {
     if (!pkg.imports) {
       continue;
     }
 
     scopes[pkg.at()] = pkg.imports;
+  }
+
+  if (Object.keys(importMap.scopes).length === 0) {
+    delete importMap.scopes;
   }
 }
 
@@ -195,14 +212,13 @@ function findInImports(
   }
 }
 
-interface Graph {
-  packages: Map<string, Package>;
-  local: Map<string, Map<string, Package>>;
-}
+type Packages = Map<string, Package>;
 
 /** Build the dependency tree of all packages */
-function buildGraph(info: Info, imports: Record<string, string> = {}): Graph {
-  const local = new Map<string, Map<string, Package>>();
+function getPackages(
+  info: Info,
+  imports: Record<string, string> = {},
+): Packages {
   const packages = new Map<string, Package>();
 
   for (const module of info.modules) {
@@ -210,23 +226,17 @@ function buildGraph(info: Info, imports: Record<string, string> = {}): Graph {
     if (module.specifier.startsWith("file:")) {
       module.dependencies?.filter((d) => !d.specifier.startsWith("."))
         .forEach((d) => {
-          const pkg = getPackage(d.code?.specifier || d.type?.specifier!);
-          if (!pkg) {
+          const dep = getPackage(d.code?.specifier || d.type?.specifier!);
+          if (!dep) {
             return;
           }
 
-          if (!packages.has(pkg.id)) {
-            packages.set(pkg.id, pkg);
+          if (!packages.has(dep.id)) {
+            packages.set(dep.id, dep);
           }
 
-          if (!local.has(module.specifier)) {
-            local.set(module.specifier, new Map());
-          }
-
-          local.get(module.specifier)!.set(
-            findInImports(d.specifier, imports) || pkg.id,
-            pkg,
-          );
+          const id = findInImports(d.specifier, imports) || dep.id;
+          packages.get(dep.id)!.dependents.set(id, packages.get(dep.id)!);
         });
       continue;
     }
@@ -283,11 +293,11 @@ function buildGraph(info: Info, imports: Record<string, string> = {}): Graph {
     }
   }
 
-  return { packages, local };
+  return packages;
 }
 
 /** Parse an URL and create a package instance */
-function getPackage(url: string): Package | undefined {
+function getPackage(url: string, keepFile = false): Package | undefined {
   if (url.startsWith("file:")) {
     return;
   }
@@ -295,8 +305,10 @@ function getPackage(url: string): Package | undefined {
   for (const R of registries) {
     if (R.regexp.some((r) => r.test(url))) {
       const pkg = R.parse(url) as Package;
-      pkg.file = pkg.file ? "/" : "";
-      pkg.url = pkg.at();
+      if (!keepFile) {
+        pkg.file = pkg.file ? "/" : "";
+        pkg.url = pkg.at();
+      }
       pkg.dependencies = new Map();
       pkg.dependents = new Map();
       return pkg;
