@@ -1,7 +1,8 @@
-import { parse, RegistryUrl } from "./utils.ts";
+import { Package, parse } from "./utils.ts";
 import { npmVersions } from "./npm.ts";
 
-export class EsmSh extends RegistryUrl {
+export class EsmSh extends Package {
+  static type = "esm.sh";
   static regexp = [
     /https?:\/\/esm.sh\/[^/"']*?\@[^'"]*/,
     /https?:\/\/esm\.sh\/@[^/"']*?\/[^/"']*?\@[^'"]*/,

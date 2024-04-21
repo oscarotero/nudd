@@ -1,6 +1,7 @@
-import { parse, readJson, RegistryUrl } from "./utils.ts";
+import { Package, parse, readJson } from "./utils.ts";
 
-export class NestLand extends RegistryUrl {
+export class NestLand extends Package {
+  static type = "nestland";
   static regexp = [
     /https?:\/\/x\.nest\.land\/[^/"']+@(?!master)[^/"']+\/[^'"]*/,
   ];

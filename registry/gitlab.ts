@@ -1,6 +1,7 @@
-import { readJson, RegistryUrl } from "./utils.ts";
+import { Package, readJson } from "./utils.ts";
 
-export class GitlabRaw extends RegistryUrl {
+export class GitlabRaw extends Package {
+  static type = "gitlab";
   static regexp = [
     /https?:\/\/gitlab\.com\/[^/"']+\/[^/"']+\/-\/raw\/(?!master)[^/"']+\/[^'"]*/,
   ];
@@ -19,6 +20,7 @@ export class GitlabRaw extends RegistryUrl {
       name: match[1],
       version: match[2],
       file: match[3],
+      type: GitlabRaw.type,
     });
   }
 

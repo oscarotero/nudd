@@ -5,7 +5,7 @@ import {
   parse,
   Spinner,
 } from "../deps.ts";
-import { RegistryCtor, RegistryUrl } from "../registry/utils.ts";
+import { Package, Registry } from "../registry/utils.ts";
 import { DenoLand } from "../registry/denoland.ts";
 import { JsDelivr } from "../registry/jsdelivr.ts";
 import { Npm } from "../registry/npm.ts";
@@ -20,7 +20,7 @@ import { Denopkg } from "../registry/denopkg.ts";
 import { PaxDeno } from "../registry/paxdeno.ts";
 import { Jsr } from "../registry/jsr.ts";
 
-const registries: RegistryCtor[] = [
+const registries: Registry[] = [
   DenoLand,
   Unpkg,
   Denopkg,
@@ -119,14 +119,14 @@ async function updateCode(
 ): Promise<UpdateResult[]> {
   let content: string = Deno.readTextFileSync(filename);
   let changed = false;
-  const urls: RegistryUrl[] = codeUrls(content);
+  const packages: Package[] = codeUrls(content);
 
   // from a url we need to extract the current version
   const results: UpdateResult[] = [];
 
-  for (const v of urls) {
-    const initUrl: string = v.url!;
-    const initVersion: string = v.version;
+  for (const pkg of packages) {
+    const initUrl: string = pkg.url!;
+    const initVersion: string = pkg.version;
 
     try {
       parse(initVersion);
@@ -136,14 +136,14 @@ async function updateCode(
       continue;
     }
 
-    const newVersion = getLatestVersion(await v.versions());
+    const newVersion = getLatestVersion(await pkg.versions());
     if (initVersion === newVersion) {
       results.push({ initUrl, initVersion });
       continue;
     }
 
     if (!options.dryRun) {
-      const newUrl = v.at(newVersion);
+      const newUrl = pkg.at(newVersion);
       content = content.replace(initUrl, newUrl);
       changed = true;
     }
@@ -205,8 +205,8 @@ async function updateImportMap(
   return results;
 }
 
-function codeUrls(content: string): RegistryUrl[] {
-  const urls: RegistryUrl[] = [];
+function codeUrls(content: string): Package[] {
+  const packages: Package[] = [];
 
   for (const R of registries) {
     const allRegexp = R.regexp.map((r) =>
@@ -216,10 +216,10 @@ function codeUrls(content: string): RegistryUrl[] {
     for (const regexp of allRegexp) {
       const match = content.match(regexp);
       match?.forEach((url) =>
-        urls.push(R.parse(url.replace(/['"]/g, "") as string))
+        packages.push(R.parse(url.replace(/['"]/g, "") as string))
       );
     }
   }
 
-  return urls;
+  return packages;
 }

@@ -1,6 +1,7 @@
-import { parse, readJson, RegistryUrl } from "./utils.ts";
+import { Package, parse, readJson } from "./utils.ts";
 
-export class Jsr extends RegistryUrl {
+export class Jsr extends Package {
+  static type = "jsr";
   static regexp = [
     /jsr:\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"]*/,
     /https:\/\/jsr\.io\/\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"]*/,
@@ -19,6 +20,7 @@ export class Jsr extends RegistryUrl {
         version: match[2],
         name: match[1],
         file: match[3],
+        type: Jsr.type,
       });
     }
     return parse(Jsr, url);

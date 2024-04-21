@@ -1,7 +1,8 @@
-import { parse, RegistryUrl } from "./utils.ts";
+import { Package, parse } from "./utils.ts";
 import { githubVersions } from "./github.ts";
 
-export class JsDelivr extends RegistryUrl {
+export class JsDelivr extends Package {
+  static type = "jsdelivr";
   static regexp = [
     /https?:\/\/cdn\.jsdelivr\.net\/gh\/[^/"']+\/[^/"']+@(?!master)[^/"']+\/[^'"]*/,
   ];

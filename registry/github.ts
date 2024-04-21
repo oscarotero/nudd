@@ -1,6 +1,7 @@
-import { readJson, RegistryUrl } from "./utils.ts";
+import { Package, readJson } from "./utils.ts";
 
-export class GithubRaw extends RegistryUrl {
+export class GithubRaw extends Package {
+  static type = "github";
   static regexp = [
     /https?:\/\/raw\.githubusercontent\.com\/[^/"']+\/[^/"']+\/(?!master)[^/"']+\/[^'"]*/,
   ];
@@ -18,6 +19,7 @@ export class GithubRaw extends RegistryUrl {
       name: match[1],
       version: match[2],
       file: match[3],
+      type: GithubRaw.type,
     });
   }
 

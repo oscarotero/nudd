@@ -1,7 +1,8 @@
-import { parse, RegistryUrl } from "./utils.ts";
+import { Package, parse } from "./utils.ts";
 import { npmVersions } from "./npm.ts";
 
-export class Skypack extends RegistryUrl {
+export class Skypack extends Package {
+  static type = "skypack";
   static regexp = [
     /https?:\/\/cdn.skypack.dev(\/\_)?\/[^/"']*?\@[^'"]*/,
     /https?:\/\/cdn\.skypack\.dev(\/\_)?\/@[^/"']*?\/[^/"']*?\@[^'"]*/,

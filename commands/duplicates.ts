@@ -1,5 +1,5 @@
 import { colors, getLatestVersion, Spinner } from "../deps.ts";
-import { RegistryCtor, RegistryUrl } from "../registry/utils.ts";
+import type { Package as BasePackage, Registry } from "../registry/utils.ts";
 import { DenoLand } from "../registry/denoland.ts";
 import { JsDelivr } from "../registry/jsdelivr.ts";
 import { Npm } from "../registry/npm.ts";
@@ -13,9 +13,9 @@ import { Jspm } from "../registry/jspm.ts";
 import { Denopkg } from "../registry/denopkg.ts";
 import { PaxDeno } from "../registry/paxdeno.ts";
 import { Jsr } from "../registry/jsr.ts";
-import { loadImportMap, saveImportMap } from "../import_map.ts";
+import { ImportMap, loadImportMap, saveImportMap } from "../import_map.ts";
 
-const registries: RegistryCtor[] = [
+const registries: Registry[] = [
   DenoLand,
   Unpkg,
   Denopkg,
@@ -30,6 +30,12 @@ const registries: RegistryCtor[] = [
   Npm,
   Jsr,
 ];
+
+interface Package extends BasePackage {
+  dependencies: Map<string, Package>;
+  dependents: Map<string, Package>;
+  imports?: ImportMap["imports"];
+}
 
 interface Info {
   roots: string[];
@@ -68,92 +74,21 @@ export interface DuplicatesOptions {
   dryRun?: boolean;
 }
 
-interface Duplicates {
-  registry: string;
-  name: string;
-  versions: DuplicatedVersion[];
-}
-
-interface DuplicatedVersion {
-  version: string;
-  specifier: string;
-  dependents: string[];
-}
-
 export default async function (filename: string, options: DuplicatesOptions) {
   const spinner = new Spinner({ message: "Analyzing dependencies..." });
   spinner.start();
 
-  const info = await getInfo(filename);
-  const graph = buildGraph(info);
-
-  spinner.stop();
-  const duplicates: Duplicates[] = [];
-
-  for (const [regName, registry] of Object.entries(graph.remote)) {
-    for (const [pkgName, pkg] of Object.entries(registry)) {
-      if (Object.keys(pkg).length === 1) {
-        continue;
-      }
-
-      const versions: DuplicatedVersion[] = [];
-
-      for (const [verName, version] of Object.entries(pkg)) {
-        const dependents = findDependent(version.specifier, graph);
-        versions.push({
-          version: verName,
-          specifier: version.specifier,
-          dependents,
-        });
-      }
-
-      duplicates.push({ registry: regName, name: pkgName, versions });
-    }
-  }
-
-  if (duplicates.length === 0) {
-    console.log("No duplicates found.");
-    return;
-  }
-
-  console.log("Duplicates found:");
-
   const importMap = await loadImportMap();
-  const scopes = importMap.scopes ??= {};
+  const info = await getInfo(filename);
+  const graph = buildGraph(info, importMap.imports);
+  spinner.stop();
 
-  for (const duplicate of duplicates) {
-    const latest = getLatestVersion(duplicate.versions.map((v) => v.version));
-    const specifier = duplicate.versions.find((v) =>
-      v.version === latest
-    )!.specifier;
+  const before = JSON.stringify(importMap);
+  fixDuplicates(graph, importMap);
 
-    console.log();
-    console.log(
-      `${colors.yellow(duplicate.name)} ${
-        colors.dim(`(${duplicate.registry.toLocaleLowerCase()})`)
-      }`,
-    );
-
-    for (const version of duplicate.versions) {
-      if (version.version === latest) {
-        console.log(" -", colors.green(version.version));
-      } else {
-        console.log(" -", colors.red(version.version));
-      }
-
-      for (const dependent of version.dependents) {
-        console.log(`   ${colors.dim(dependent)}`);
-      }
-
-      if (version.version === latest) {
-        continue;
-      }
-
-      for (const dep of version.dependents) {
-        const scope = scopes[dep] ??= {};
-        scope[version.specifier] = specifier;
-      }
-    }
+  if (before === JSON.stringify(importMap)) {
+    console.log(colors.green("No duplicates found"));
+    return;
   }
 
   if (!options.dryRun) {
@@ -173,26 +108,71 @@ export default async function (filename: string, options: DuplicatesOptions) {
   }
 }
 
-function findDependent(id: string, graph: Graph): string[] {
-  const dependents: string[] = [];
+/** Inspect a graph and detect duplicated versions of the same package */
+function fixDuplicates(graph: Graph, importMap: ImportMap) {
+  const versions = new Map<string, Map<string, Package>>();
 
-  for (const registry of Object.values(graph.remote)) {
-    for (const pkg of Object.values(registry)) {
-      for (const version of Object.values(pkg)) {
-        if (version.dependencies.has(id)) {
-          dependents.push(version.specifier);
+  // Map all packages by type:name and version
+  for (const pkg of graph.packages.values()) {
+    const key = `${pkg.type}:${pkg.name}`;
+
+    if (!versions.has(key)) {
+      versions.set(key, new Map());
+    }
+
+    versions.get(key)!.set(pkg.version, pkg);
+  }
+
+  // Map dependents to the latest version
+  for (const [key, version] of versions.entries()) {
+    if (version.size > 1) {
+      console.log();
+      console.log(colors.yellow(key));
+      const latestVersion = getLatestVersion(Array.from(version.keys()));
+
+      for (const [semver, pkg] of version) {
+        if (semver === latestVersion) {
+          console.log("  ", colors.green(semver));
+          pkg.dependents.forEach((dep) => {
+            console.log("    ", colors.dim(dep.id));
+          });
+          continue;
         }
+
+        console.log("  ", colors.red(semver));
+        pkg.dependents.forEach((dep) => {
+          console.log("    ", colors.dim(dep.id));
+          dep.imports ??= {};
+          dep.imports[pkg.url] = pkg.at(latestVersion);
+        });
       }
     }
   }
 
-  for (const [specifier, dependencies] of Object.entries(graph.local)) {
-    if (dependencies.includes(id)) {
-      dependents.push(specifier);
+  // Remove old versions of duplicates
+  for (const version of versions.values()) {
+    if (version.size > 1) {
+      const latestVersion = getLatestVersion(Array.from(version.keys()));
+
+      for (const [semver, pkg] of version) {
+        if (semver === latestVersion) {
+          continue;
+        }
+
+        graph.packages.delete(pkg.id);
+      }
     }
   }
 
-  return dependents;
+  // Get all scopes
+  const scopes = importMap.scopes ??= {};
+  for (const pkg of graph.packages.values()) {
+    if (!pkg.imports) {
+      continue;
+    }
+
+    scopes[pkg.at()] = pkg.imports;
+  }
 }
 
 async function getInfo(name: string): Promise<Info> {
@@ -203,103 +183,125 @@ async function getInfo(name: string): Promise<Info> {
   const result = await command.output();
   return JSON.parse(new TextDecoder().decode(result.stdout)) as Info;
 }
-interface Graph {
-  remote: Record<string, Registry>;
-  local: Record<string, string[]>;
-}
-type Registry = Record<string, Package>;
-type Package = Record<string, Version>;
-interface Version {
-  specifier: string;
-  dependencies: Set<string>;
+
+function findInImports(
+  specifier: string,
+  imports: Record<string, string>,
+): string | undefined {
+  for (const key of Object.keys(imports)) {
+    if (specifier.startsWith(key)) {
+      return key;
+    }
+  }
 }
 
-function buildGraph(info: Info): Graph {
-  const graph: Graph = {
-    remote: {},
-    local: {},
-  };
+interface Graph {
+  packages: Map<string, Package>;
+  local: Map<string, Map<string, Package>>;
+}
+
+/** Build the dependency tree of all packages */
+function buildGraph(info: Info, imports: Record<string, string> = {}): Graph {
+  const local = new Map<string, Map<string, Package>>();
+  const packages = new Map<string, Package>();
 
   for (const module of info.modules) {
     // Local modules
     if (module.specifier.startsWith("file:")) {
       module.dependencies?.filter((d) => !d.specifier.startsWith("."))
         .forEach((d) => {
-          const specifier = getRegistry(
-            d.code?.specifier || d.type?.specifier!,
-          );
-          if (specifier) {
-            graph.local[module.specifier] ??= [];
-            graph.local[module.specifier].push(getId(specifier));
+          const pkg = getPackage(d.code?.specifier || d.type?.specifier!);
+          if (!pkg) {
+            return;
           }
+
+          if (!packages.has(pkg.id)) {
+            packages.set(pkg.id, pkg);
+          }
+
+          if (!local.has(module.specifier)) {
+            local.set(module.specifier, new Map());
+          }
+
+          local.get(module.specifier)!.set(
+            findInImports(d.specifier, imports) || pkg.id,
+            pkg,
+          );
         });
       continue;
     }
 
-    const reg = getRegistry(module.specifier);
+    const pkg = getPackage(module.specifier);
 
-    if (!reg) {
+    if (!pkg) {
       continue;
     }
 
-    const registryId = reg.constructor.name;
-    const registry = graph.remote[registryId] ??= {};
-    const pkg = registry[reg.name] ??= {};
-
-    const version = pkg[reg.version] ??= {
-      specifier: getId(reg),
-      dependencies: new Set(),
-    };
+    if (!packages.has(pkg.id)) {
+      packages.set(pkg.id, pkg);
+    }
 
     module.dependencies
       ?.filter((d) => !d.specifier.startsWith("."))
       .forEach((d) => {
-        const specifier = getRegistry(d.code?.specifier || d.type?.specifier!);
-        if (specifier) {
-          version.dependencies.add(getId(specifier));
+        const dep = getPackage(d.code?.specifier || d.type?.specifier!);
+        if (!dep) {
+          return;
         }
+
+        if (!packages.has(dep.id)) {
+          packages.set(dep.id, dep);
+        }
+        packages.get(pkg.id)!.dependencies.set(dep.id, packages.get(dep.id)!);
+        packages.get(dep.id)!.dependents.set(pkg.id, packages.get(pkg.id)!);
       });
   }
 
   for (const npmPackage of Object.values(info.npmPackages)) {
-    const reg = new Npm({
-      name: npmPackage.name,
-      version: npmPackage.version,
-    });
-    const registry = graph.remote.Npm ??= {};
-    const pkg = registry[reg.name] ??= {};
-    const version = pkg[reg.version] ??= {
-      specifier: getId(reg),
-      dependencies: new Set(),
-    };
+    const pkg = getPackage(`npm:${npmPackage.name}@${npmPackage.version}`);
+
+    if (!pkg) {
+      throw new Error(`Unable to parse NPM package ${npmPackage.name}`);
+    }
+
+    if (!packages.has(pkg.id)) {
+      packages.set(pkg.id, pkg);
+    }
 
     for (const dependency of npmPackage.dependencies) {
-      version.dependencies.add(getNpmCanonical(dependency));
+      const dep = getPackage(`npm:${dependency}`);
+
+      if (!dep) {
+        throw new Error(`Unable to parse NPM package ${dependency}`);
+      }
+
+      if (!packages.has(dep.id)) {
+        packages.set(dep.id, dep);
+      }
+      packages.get(pkg.id)!.dependencies.set(dep.id, packages.get(dep.id)!);
+      packages.get(dep.id)!.dependents.set(pkg.id, packages.get(pkg.id)!);
     }
   }
 
-  return graph;
+  return { packages, local };
 }
 
-function getId(url: RegistryUrl): string {
-  return url.at(undefined, url.file ? "/" : "");
-}
-
-function getRegistry(url: string): RegistryUrl | undefined {
+/** Parse an URL and create a package instance */
+function getPackage(url: string): Package | undefined {
   if (url.startsWith("file:")) {
     return;
   }
 
   for (const R of registries) {
     if (R.regexp.some((r) => r.test(url))) {
-      return R.parse(url);
+      const pkg = R.parse(url) as Package;
+      pkg.file = pkg.file ? "/" : "";
+      pkg.url = pkg.at();
+      pkg.dependencies = new Map();
+      pkg.dependents = new Map();
+      return pkg;
     }
   }
 
   // console.log("Unable to find registry for " + url);
-}
-
-function getNpmCanonical(url: string): string {
-  const spec = Npm.parse(`npm:${url}`);
-  return getId(spec);
 }

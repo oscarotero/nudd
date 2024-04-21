@@ -1,7 +1,8 @@
-import { parse, RegistryUrl } from "./utils.ts";
+import { Package, parse } from "./utils.ts";
 import { githubVersions } from "./github.ts";
 
-export class Denopkg extends RegistryUrl {
+export class Denopkg extends Package {
+  static type = "denopkg";
   static regexp = [/https?:\/\/denopkg.com\/[^/"']*?\/[^/"']*?\@[^'"]*/];
 
   static parse(url: string): Denopkg {

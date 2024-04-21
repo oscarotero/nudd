@@ -1,7 +1,8 @@
-import { parse, RegistryUrl } from "./utils.ts";
+import { Package, parse } from "./utils.ts";
 import { githubVersions } from "./github.ts";
 
-export class PaxDeno extends RegistryUrl {
+export class PaxDeno extends Package {
+  static type = "paxdeno";
   static regexp = [/https?:\/\/pax.deno.dev\/[^/"']*?\/[^/"']*?\@[^'"]*/];
 
   static parse(url: string): PaxDeno {

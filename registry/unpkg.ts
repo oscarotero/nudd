@@ -1,7 +1,8 @@
-import { parse, RegistryUrl } from "./utils.ts";
+import { Package, parse } from "./utils.ts";
 import { npmVersions } from "./npm.ts";
 
-export class Unpkg extends RegistryUrl {
+export class Unpkg extends Package {
+  static type = "unpkg";
   static regexp = [
     /https?:\/\/unpkg.com\/[^/"']*?\@[^'"]*/,
   ];

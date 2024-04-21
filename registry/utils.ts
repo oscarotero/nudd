@@ -1,14 +1,20 @@
-export abstract class RegistryUrl {
-  url?: string;
-  version: string;
-  name: string;
+export abstract class Package {
+  readonly type: string;
+  readonly name: string;
+  readonly version: string;
+  url: string;
   file: string;
 
-  constructor(data: ParseResult) {
-    this.url = data.url;
+  constructor(data: PackageData) {
     this.version = data.version;
     this.name = data.name;
     this.file = data.file || "";
+    this.url = data.url || this.at();
+    this.type = data.type;
+  }
+
+  get id(): string {
+    return `${this.type}:${this.name}@${this.version}`;
   }
 
   /** Returns all available versions */
@@ -19,10 +25,10 @@ export abstract class RegistryUrl {
 }
 
 export function parse(
-  ctor: RegistryCtor,
+  ctor: Registry,
   url: string,
   atScope = true,
-): RegistryUrl {
+): Package {
   // Scoped
   let match = atScope
     ? url.match(/[/:](@[^/:]+)\/([^/:]+)@([^/]+)(.*)$/)
@@ -34,6 +40,7 @@ export function parse(
       version: match[3],
       name: `${match[1]}/${match[2]}`,
       file: match[4],
+      type: ctor.type,
     });
   }
 
@@ -46,23 +53,26 @@ export function parse(
       version: match[2],
       name: match[1],
       file: match[3],
+      type: ctor.type,
     });
   }
 
   throw new Error(`Unable to parse ${url}`);
 }
 
-export interface RegistryCtor {
-  new (data: ParseResult): RegistryUrl;
-  parse(url: string): RegistryUrl;
+export interface Registry {
+  new (data: PackageData): Package;
+  parse(url: string): Package;
   regexp: RegExp[];
+  type: string;
 }
 
-export interface ParseResult {
+export interface PackageData {
   url?: string;
   version: string;
   name: string;
   file?: string;
+  type: string;
 }
 
 export const cache: Map<string, Promise<string[]>> = new Map();

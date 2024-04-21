@@ -1,7 +1,8 @@
-import { parse, RegistryUrl } from "./utils.ts";
+import { Package, parse } from "./utils.ts";
 import { npmVersions } from "./npm.ts";
 
-export class Jspm extends RegistryUrl {
+export class Jspm extends Package {
+  static type = "jspm";
   static regexp = [
     /https?:\/\/dev.jspm.io\/npm:[^/"']*?\@[^'"]*/,
     /https?:\/\/jspm.dev\/[^/"']*?\@[^'"]*/,

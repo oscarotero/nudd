@@ -1,6 +1,7 @@
-import { parse, readJson, RegistryUrl } from "./utils.ts";
+import { Package, parse, readJson } from "./utils.ts";
 
-export class DenoLand extends RegistryUrl {
+export class DenoLand extends Package {
+  static type = "denoland";
   static regexp = [
     /https?:\/\/deno.land\/(?:std\@[^'"]*|x\/[^/"']*?\@[^'"]*)/,
   ];

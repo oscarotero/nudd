@@ -12,10 +12,11 @@ Positional arguments:
   file      \tfiles to update dependencies
 
 Optional arguments:
- -h, --help \tshow this help text
- --dry-run  \ttest what dependencies can be updated
- --upgrade  \tupdate up to the latest version
- --version  \tprint the version of up`);
+ -h, --help   \tshow this help text
+ --dry-run    \ttest what dependencies can be updated
+ --duplicates \tshow and fix duplicated dependencies
+ --upgrade    \tupdate up to the latest version
+ --version    \tprint the version of up`);
 }
 
 function version() {
@@ -62,6 +63,7 @@ async function upgrade() {
 async function main(args: string[]) {
   const a = parseArgs(args, {
     boolean: ["dry-run", "help", "upgrade", "version"],
+    string: ["duplicates"],
     alias: {
       h: "help",
       v: "version",
@@ -76,12 +78,12 @@ async function main(args: string[]) {
     return version();
   }
 
-  if (a.help || a._.length === 0) {
-    return help();
+  if (a.duplicates) {
+    return duplicatesCommand(a.duplicates, { dryRun: a["dry-run"] });
   }
 
-  if (a._[0] === "duplicates") {
-    return duplicatesCommand(a._[1] as string, { dryRun: a["dry-run"] });
+  if (a.help || a._.length === 0) {
+    return help();
   }
 
   return updateCommand(a._ as string[], { dryRun: a["dry-run"] });

@@ -1,6 +1,7 @@
-import { parse, readJson, RegistryUrl } from "./utils.ts";
+import { Package, parse, readJson } from "./utils.ts";
 
-export class Npm extends RegistryUrl {
+export class Npm extends Package {
+  static type = "npm";
   static regexp = [
     /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@[^/"']+)?[^'"]*/,
   ];
