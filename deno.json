@@ -6,6 +6,8 @@
     "install": "deno install --allow-run --allow-read --allow-write --allow-net --name nudd --force --reload --global ./cli.ts"
   },
   "fmt": {
-    "exclude": ["CHANGELOG.md"]
+    "exclude": [
+      "CHANGELOG.md"
+    ]
   }
 }

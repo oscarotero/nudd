@@ -40,7 +40,8 @@ interface Package extends BasePackage {
 interface Info {
   roots: string[];
   modules: InfoModule[];
-  redirects: string[];
+  redirects: Record<string, string>;
+  packages: Record<string, string>;
   npmPackages: Record<string, InfoNmpPackage>;
 }
 
@@ -152,10 +153,21 @@ function fixDuplicates(packages: Packages, importMap: ImportMap) {
               );
             }
             importMap.imports[key] = pkg.at(latestVersion);
+            return;
+          }
+
+          console.log("    ", colors.dim(dep.id));
+          dep.imports ??= {};
+
+          // https://github.com/denoland/deno/issues/23504
+          if (pkg instanceof Jsr) {
+            const pkg = getPackage(key, true);
+            if (!pkg) {
+              throw new Error(`Unable to parse package ${key}`);
+            }
+            dep.imports[key] = pkg.at(latestVersion);
           } else {
-            console.log("    ", colors.dim(dep.id));
-            dep.imports ??= {};
-            dep.imports[pkg.url] = pkg.at(latestVersion);
+            dep.imports[key] = pkg.at(latestVersion);
           }
         });
       }
@@ -184,7 +196,12 @@ function fixDuplicates(packages: Packages, importMap: ImportMap) {
       continue;
     }
 
-    scopes[pkg.at()] = pkg.imports;
+    // https://github.com/denoland/deno/issues/23504
+    if (pkg instanceof Jsr) {
+      scopes[pkg.atHttp()] = pkg.imports;
+    } else {
+      scopes[pkg.at()] = pkg.imports;
+    }
   }
 
   if (Object.keys(importMap.scopes).length === 0) {
@@ -254,7 +271,9 @@ function getPackages(
     module.dependencies
       ?.filter((d) => !d.specifier.startsWith("."))
       .forEach((d) => {
-        const dep = getPackage(d.code?.specifier || d.type?.specifier!);
+        const specifier = d.code?.specifier || d.type?.specifier!;
+
+        const dep = getPackage(info.redirects[specifier] || specifier);
         if (!dep) {
           return;
         }
@@ -263,7 +282,8 @@ function getPackages(
           packages.set(dep.id, dep);
         }
         packages.get(pkg.id)!.dependencies.set(dep.id, packages.get(dep.id)!);
-        packages.get(dep.id)!.dependents.set(pkg.id, packages.get(pkg.id)!);
+        const id = pkg.type === "jsr" ? d.specifier : pkg.id;
+        packages.get(dep.id)!.dependents.set(id, packages.get(pkg.id)!);
       });
   }
 
