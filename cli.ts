@@ -1,20 +1,23 @@
-import { getLatestVersion, parseArgs } from "./deps.ts";
+import { colors, getLatestVersion, parseArgs } from "./deps.ts";
 import updateCommand from "./commands/update.ts";
 import duplicatesCommand from "./commands/duplicates.ts";
 import { DenoLand } from "./registry/denoland.ts";
 
 function help() {
-  console.log(`usage: nudd [-h] [--dry-run] file [file ...]
+  console.log(`usage: nudd [-h] [--dry-run] [command] [args...]
 
 nudd: Deno Dependencies
 
-Positional arguments:
-  file      \tfiles to update dependencies
+Commands:
+  update       \tupdate dependencies
+               \t${colors.dim("nudd update one.ts two.ts ...")}
+
+  duplicates   \tshow and fix duplicated dependencies
+               \t${colors.dim("nudd duplicates main.ts")}
 
 Optional arguments:
  -h, --help   \tshow this help text
  --dry-run    \ttest what dependencies can be updated
- --duplicates \tshow and fix duplicated dependencies
  --upgrade    \tupdate up to the latest version
  --version    \tprint the version of up`);
 }
@@ -62,31 +65,42 @@ async function upgrade() {
 
 async function main(args: string[]) {
   const a = parseArgs(args, {
-    boolean: ["dry-run", "help", "upgrade", "version"],
-    string: ["duplicates"],
+    boolean: ["dry-run", "help", "version"],
     alias: {
       h: "help",
       v: "version",
     },
   });
 
-  if (a.upgrade) {
-    return await upgrade();
-  }
-
   if (a.version) {
     return version();
   }
 
-  if (a.duplicates) {
-    return duplicatesCommand(a.duplicates, { dryRun: a["dry-run"] });
-  }
-
-  if (a.help || a._.length === 0) {
+  if (a.help) {
     return help();
   }
 
-  return updateCommand(a._ as string[], { dryRun: a["dry-run"] });
+  const rest: string[] = a._.map((f) => String(f));
+  const command = rest.shift();
+
+  if (command === "upgrade") {
+    return await upgrade();
+  }
+
+  if (command === "update") {
+    return updateCommand(rest, { dryRun: a["dry-run"] });
+  }
+
+  if (command === "duplicates") {
+    const file = rest.shift();
+    if (!file) {
+      throw new Error("Missing file argument.");
+    }
+    return duplicatesCommand(file, { dryRun: a["dry-run"] });
+  }
+
+  console.error(colors.red(`Unknown command: ${command}`));
+  help();
 }
 
 if (import.meta.main) {

@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Support for `https://deno.re/` urls.
 - Added `duplicates` command.
 
+### Changed
+- Breaking: Removed default command. Use `nudd update [files...]` to update dependencies.
+
 ### Fixed
 - Updated dependencies
 

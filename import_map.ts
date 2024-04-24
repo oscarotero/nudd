@@ -37,7 +37,10 @@ export async function saveImportMap(map: ImportMap): Promise<void> {
   const config = await loadDenoConfig();
 
   if (config.importMap) {
-    await Deno.writeTextFile(config.importMap, JSON.stringify(map, null, 2) + "\n");
+    await Deno.writeTextFile(
+      config.importMap,
+      JSON.stringify(map, null, 2) + "\n",
+    );
   }
 
   config.imports = map.imports;
