@@ -4,13 +4,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.2.0] - Unreleased
+## [0.2.0] - 2024-05-01
 ### Added
 - Allow to change the file path in `Registry.at()`.
+- Update specifiers inside `tasks` in deno.json files.
 - Support for `https://jspm.dev/` urls.
 - Support for `https://jsr.io/` urls.
 - Support for `https://deno.re/` urls.
-- Added `duplicates` command.
+- Added `duplicates` command (experimental).
 
 ### Changed
 - Breaking: Removed default command. Use `nudd update [files...]` to update dependencies.
@@ -30,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.1.0] - 2024-04-14
 First version
 
-[0.2.0]: https://github.com/oscarotero/nudd/compare/v0.1.2...HEAD
+[0.2.0]: https://github.com/oscarotero/nudd/compare/v0.1.2...v0.2.0
 [0.1.2]: https://github.com/oscarotero/nudd/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/oscarotero/nudd/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/oscarotero/nudd/releases/tag/v0.1.0

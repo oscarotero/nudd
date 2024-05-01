@@ -3,7 +3,7 @@ import { Package, readJson } from "./utils.ts";
 export class GithubRaw extends Package {
   static type = "github";
   static regexp = [
-    /https?:\/\/raw\.githubusercontent\.com\/[^/"']+\/[^/"']+\/(?!master)[^/"']+\/[^'"]*/,
+    /https?:\/\/raw\.githubusercontent\.com\/[^/"']+\/[^/"']+\/(?!master)[^/"']+\/[^'"\s]*/,
   ];
 
   static parse(url: string): GithubRaw {

@@ -3,7 +3,7 @@ import { Package, parse, readJson } from "./utils.ts";
 export class Npm extends Package {
   static type = "npm";
   static regexp = [
-    /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@[^/"']+)?[^'"]*/,
+    /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@[^/"'\s]+)?[^'"\s]*/,
   ];
 
   static parse(url: string): Npm {

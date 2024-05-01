@@ -3,7 +3,7 @@ import { githubVersions } from "./github.ts";
 
 export class PaxDeno extends Package {
   static type = "paxdeno";
-  static regexp = [/https?:\/\/pax.deno.dev\/[^/"']*?\/[^/"']*?\@[^'"]*/];
+  static regexp = [/https?:\/\/pax.deno.dev\/[^/"']*?\/[^/"']*?\@[^'"\s]*/];
 
   static parse(url: string): PaxDeno {
     return parse(PaxDeno, url, false);

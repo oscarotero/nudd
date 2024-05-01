@@ -108,23 +108,38 @@ export async function update(
   filename: string,
   options: UpdateOptions,
 ): Promise<UpdateResult[]> {
+  const results: UpdateResult[] = [];
+  const content = Deno.readTextFileSync(filename);
+
   if (filename.endsWith(".json")) {
-    return await updateImportMap(filename, options);
+    const map = JSON.parse(content) as ImportMap;
+    const updatedMap = await updateImportMap(map, options, results);
+
+    if (updatedMap) {
+      Deno.writeTextFileSync(
+        filename,
+        JSON.stringify(updatedMap, null, 2) + "\n",
+      );
+    }
+    return results;
   }
 
-  return await updateCode(filename, options);
+  const updatedContent = await updateCode(content, options, results);
+
+  if (updatedContent) {
+    Deno.writeTextFileSync(filename, updatedContent);
+  }
+
+  return results;
 }
 
 async function updateCode(
-  filename: string,
+  content: string,
   options: UpdateOptions,
-): Promise<UpdateResult[]> {
-  let content: string = Deno.readTextFileSync(filename);
+  results: UpdateResult[],
+): Promise<string | undefined> {
   let changed = false;
-  const packages: Package[] = codeUrls(content);
-
-  // from a url we need to extract the current version
-  const results: UpdateResult[] = [];
+  const packages = codeUrls(content);
 
   for (const pkg of packages) {
     const initUrl: string = pkg.url!;
@@ -157,54 +172,56 @@ async function updateCode(
     });
   }
 
-  if (changed) {
-    Deno.writeTextFileSync(filename, content);
-  }
-
-  return results;
+  return changed ? content : undefined;
 }
 
 interface ImportMap {
   imports?: Record<string, string>;
+  tasks?: Record<string, string>; // only in deno.json
 }
 
 async function updateImportMap(
-  filename: string,
+  json: ImportMap,
   options: UpdateOptions,
-): Promise<UpdateResult[]> {
-  const content: string = Deno.readTextFileSync(filename);
-  const json = JSON.parse(content) as ImportMap;
-  const results: UpdateResult[] = [];
+  results: UpdateResult[],
+): Promise<ImportMap | undefined> {
   let changed = false;
 
-  if (!json.imports) {
-    return results;
+  if (!json.imports && !json.tasks) {
+    return;
   }
 
-  for (const [key, initUrl] of Object.entries(json.imports)) {
-    for (const R of registries) {
-      if (R.regexp.some((r) => r.test(initUrl))) {
-        const v = R.parse(initUrl);
-        const newVersion = getLatestVersion(await v.versions());
+  if (json.imports) {
+    for (const [key, initUrl] of Object.entries(json.imports)) {
+      for (const R of registries) {
+        if (R.regexp.some((r) => r.test(initUrl))) {
+          const v = R.parse(initUrl);
+          const newVersion = getLatestVersion(await v.versions());
 
-        if (v.version !== newVersion && !options.dryRun) {
-          json.imports[key] = v.at(newVersion);
-          results.push({ initUrl, initVersion: v.version, newVersion });
-          changed = true;
+          if (v.version !== newVersion && !options.dryRun) {
+            json.imports[key] = v.at(newVersion);
+            results.push({ initUrl, initVersion: v.version, newVersion });
+            changed = true;
+            break;
+          }
+
+          results.push({ initUrl, initVersion: v.version });
           break;
         }
-
-        results.push({ initUrl, initVersion: v.version });
-        break;
+      }
+    }
+  }
+  if (json.tasks) {
+    for (const [key, command] of Object.entries(json.tasks)) {
+      const updatedCommand = await updateCode(command + " ", options, results);
+      if (updatedCommand) {
+        json.tasks[key] = updatedCommand.slice(0, -1);
+        changed = true;
       }
     }
   }
 
-  if (changed) {
-    Deno.writeTextFileSync(filename, JSON.stringify(json, null, 2) + "\n");
-  }
-
-  return results;
+  return changed ? json : undefined;
 }
 
 function codeUrls(content: string): Package[] {
@@ -212,13 +229,13 @@ function codeUrls(content: string): Package[] {
 
   for (const R of registries) {
     const allRegexp = R.regexp.map((r) =>
-      new RegExp(`['"]${r.source}['"]`, "g")
+      new RegExp(`['"\\s]${r.source}['"\\s$]`, "g")
     );
 
     for (const regexp of allRegexp) {
       const match = content.match(regexp);
       match?.forEach((url) =>
-        packages.push(R.parse(url.replace(/['"]/g, "") as string))
+        packages.push(R.parse(url.replace(/['"\s]/g, "") as string))
       );
     }
   }

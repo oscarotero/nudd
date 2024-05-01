@@ -3,7 +3,7 @@ import { githubVersions } from "./github.ts";
 
 export class Denopkg extends Package {
   static type = "denopkg";
-  static regexp = [/https?:\/\/denopkg.com\/[^/"']*?\/[^/"']*?\@[^'"]*/];
+  static regexp = [/https?:\/\/denopkg.com\/[^/"']*?\/[^/"']*?\@[^'"\s]*/];
 
   static parse(url: string): Denopkg {
     return parse(Denopkg, url, false);

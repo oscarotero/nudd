@@ -4,7 +4,7 @@ import { githubVersions } from "./github.ts";
 export class JsDelivr extends Package {
   static type = "jsdelivr";
   static regexp = [
-    /https?:\/\/cdn\.jsdelivr\.net\/gh\/[^/"']+\/[^/"']+@(?!master)[^/"']+\/[^'"]*/,
+    /https?:\/\/cdn\.jsdelivr\.net\/gh\/[^/"']+\/[^/"']+@(?!master)[^/"']+\/[^'"\s]*/,
   ];
 
   static parse(url: string): JsDelivr {

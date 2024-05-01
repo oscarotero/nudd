@@ -3,7 +3,7 @@ import { Package, parse, readJson } from "./utils.ts";
 export class NestLand extends Package {
   static type = "nestland";
   static regexp = [
-    /https?:\/\/x\.nest\.land\/[^/"']+@(?!master)[^/"']+\/[^'"]*/,
+    /https?:\/\/x\.nest\.land\/[^/"']+@(?!master)[^/"']+\/[^'"\s]*/,
   ];
 
   static parse(url: string): NestLand {

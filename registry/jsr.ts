@@ -3,8 +3,8 @@ import { Package, parse, readJson } from "./utils.ts";
 export class Jsr extends Package {
   static type = "jsr";
   static regexp = [
-    /jsr:\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"]*/,
-    /https:\/\/jsr\.io\/\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"]*/,
+    /jsr:\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"\s]*/,
+    /https:\/\/jsr\.io\/\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"\s]*/,
   ];
 
   static parse(url: string): Package {

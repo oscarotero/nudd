@@ -3,7 +3,7 @@ import { Package, parse, readJson } from "./utils.ts";
 export class DenoLand extends Package {
   static type = "denoland";
   static regexp = [
-    /https?:\/\/deno.land\/(?:std\@[^'"]*|x\/[^/"']*?\@[^'"]*)/,
+    /https?:\/\/deno.land\/(?:std\@[^'"]*|x\/[^/"']*?\@[^'"\s]*)/,
   ];
 
   static parse(url: string): DenoLand {

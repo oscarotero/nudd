@@ -5,7 +5,7 @@ export class EsmSh extends Package {
   static type = "esm.sh";
   static regexp = [
     /https?:\/\/esm.sh\/[^/"']*?\@[^'"]*/,
-    /https?:\/\/esm\.sh\/@[^/"']*?\/[^/"']*?\@[^'"]*/,
+    /https?:\/\/esm\.sh\/@[^/"']*?\/[^/"']*?\@[^'"\s]*/,
   ];
 
   static parse(url: string): EsmSh {

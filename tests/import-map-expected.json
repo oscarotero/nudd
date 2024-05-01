@@ -26,5 +26,27 @@
       "@unpkg": "https://unpkg.com/@foo/bar@0.1.0/mod.ts",
       "https://unpkg.com/@foo/bar@0.1.0/mod.ts": "https://unpkg.com/@foo/bar@0.1.0/mod.ts"
     }
+  },
+  "tasks": {
+    "task1": "deno run --allow-read https://raw.githubusercontent.com/foo/bar/0.2.0/cli.ts",
+    "task2": "deno run --allow-read https://pax.deno.dev/foo/bar@0.2.0/cli.ts --foo",
+    "task3": "deno run --allow-read https://denopkg.com/foo/bar@0.2.0/cli.ts",
+    "task4": "deno run --allow-read https://esm.sh/foo-bar@0.2.0/cli.ts",
+    "task5": "deno run --allow-read https://esm.sh/@foo/bar@0.2.0/cli.ts --foo",
+    "task6": "deno run --allow-read https://gitlab.com/foo/bar/-/raw/0.2.0/cli.ts",
+    "task7": "deno run --allow-read https://cdn.jsdelivr.net/gh/foo/bar@0.2.0/cli.ts",
+    "task8": "deno run --allow-read https://dev.jspm.io/npm:foo-bar@0.2.0 --foo",
+    "task9": "deno run --allow-read npm:foo-bar@0.2.0",
+    "task10": "deno run --allow-read npm:foo-bar@0.2.0/cli.ts",
+    "task11": "deno run --allow-read npm:@foo/bar@0.2.0 --foo",
+    "task12": "deno run --allow-read npm:@foo/bar@0.2.0/cli.ts --foo",
+    "task13": "deno run --allow-read https://x.nest.land/foo-bar@0.2.0/cli.ts",
+    "task14": "deno run --allow-read https://cdn.skypack.dev/foo-bar@0.2.0 --foo",
+    "task15": "deno run --allow-read https://cdn.skypack.dev/@foo/bar@0.2.0/cli.ts",
+    "task16": "deno run --allow-read https://cdn.skypack.dev/foo-bar@0.2.0 --foo",
+    "task17": "deno run --allow-read https://cdn.skypack.dev/@foo/bar@0.2.0/cli.ts",
+    "task18": "deno run --allow-read https://unpkg.com/foo-bar@0.2.0 --foo",
+    "task19": "deno run --allow-read https://unpkg.com/@foo/bar@0.2.0/cli.ts",
+    "task20": "deno run --allow-read https://deno.land/x/foo_bar@0.2.0/cli.ts --foo"
   }
 }

@@ -4,7 +4,7 @@ import { npmVersions } from "./npm.ts";
 export class Unpkg extends Package {
   static type = "unpkg";
   static regexp = [
-    /https?:\/\/unpkg.com\/[^/"']*?\@[^'"]*/,
+    /https?:\/\/unpkg.com\/[^/"']*?\@[^'"\s]*/,
   ];
 
   static parse(url: string): Unpkg {

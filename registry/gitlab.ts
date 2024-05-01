@@ -3,7 +3,7 @@ import { Package, readJson } from "./utils.ts";
 export class GitlabRaw extends Package {
   static type = "gitlab";
   static regexp = [
-    /https?:\/\/gitlab\.com\/[^/"']+\/[^/"']+\/-\/raw\/(?!master)[^/"']+\/[^'"]*/,
+    /https?:\/\/gitlab\.com\/[^/"']+\/[^/"']+\/-\/raw\/(?!master)[^/"']+\/[^'"\s]*/,
   ];
 
   static parse(url: string): GitlabRaw {
