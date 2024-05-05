@@ -1,10 +1,11 @@
 import { Package, parse, readJson } from "./utils.ts";
 
 export class Jsr extends Package {
+  http = false;
   static type = "jsr";
   static regexp = [
     /jsr:\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"\s]*/,
-    /https:\/\/jsr\.io\/\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"\s]*/,
+    /https:\/\/jsr\.io\/\@[^/]+\/[^/"]+\/[^'"\s]*/,
   ];
 
   static parse(url: string): Package {
@@ -15,13 +16,15 @@ export class Jsr extends Package {
         throw new Error(`Unable to parse ${url}`);
       }
 
-      return new Jsr({
+      const pkg = new Jsr({
         url,
         version: match[2],
         name: match[1],
         file: match[3],
         type: Jsr.type,
       });
+      pkg.http = true;
+      return pkg;
     }
     return parse(Jsr, url);
   }
@@ -36,6 +39,9 @@ export class Jsr extends Package {
   }
 
   at(version = this.version, file = this.file): string {
+    if (this.http) {
+      return this.atHttp(version, file);
+    }
     return `jsr:${this.name}@${version}${file}`;
   }
 
