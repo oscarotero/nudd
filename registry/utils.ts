@@ -25,7 +25,7 @@ export abstract class Package {
 }
 
 export function parse(
-  ctor: Registry,
+  Registry: Registry,
   url: string,
   atScope = true,
 ): Package {
@@ -35,12 +35,12 @@ export function parse(
     : url.match(/[/:]([^/:]+)\/([^/:]+)@([^/]+)(.*)$/);
 
   if (match) {
-    return new ctor({
+    return new Registry({
       url,
       version: match[3],
       name: `${match[1]}/${match[2]}`,
       file: match[4],
-      type: ctor.type,
+      type: Registry.type,
     });
   }
 
@@ -48,12 +48,12 @@ export function parse(
   match = url.match(/[/:]([^/:]+)@([^/]+)(.*)$/);
 
   if (match) {
-    return new ctor({
+    return new Registry({
       url,
       version: match[2],
       name: match[1],
       file: match[3],
-      type: ctor.type,
+      type: Registry.type,
     });
   }
 

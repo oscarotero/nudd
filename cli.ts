@@ -1,6 +1,7 @@
 import { colors, getLatestVersion, parseArgs } from "./deps.ts";
 import updateCommand from "./commands/update.ts";
 import duplicatesCommand from "./commands/duplicates.ts";
+import addCommand from "./commands/add.ts";
 import { DenoLand } from "./registry/denoland.ts";
 
 function help() {
@@ -89,6 +90,10 @@ async function main(args: string[]) {
 
   if (command === "update") {
     return updateCommand(rest, { dryRun: a["dry-run"] });
+  }
+
+  if (command === "add") {
+    return addCommand(rest);
   }
 
   if (command === "duplicates") {
