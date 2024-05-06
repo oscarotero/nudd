@@ -28,16 +28,54 @@ To update:
 nudd --upgrade
 ```
 
-## Usage
+## Update imports
 
-For example, to update url imports inside `deps.ts` run:
+Update the imports of the current import map file:
 
 ```sh
-nudd deps.ts
+nudd update
+```
+
+Update the modules imported from `deps.ts` file:
+
+```sh
+nudd update deps.ts
 ```
 
 To update all the ts files in your directory:
 
 ```sh
-nudd *.ts
+nudd update *.ts
 ```
+
+Use the `--dry-run` argument to only show outdated dependencies without update
+them:
+
+```sh
+nudd update --dry-run
+```
+
+## Detect duplicated dependencies
+
+Detect and fix multiple versions of the same package:
+
+```sh
+nudd duplicates main.ts
+```
+
+Use the `--dry-run` argument to only show duplicated dependencies without fix
+them:
+
+```sh
+nudd duplicates main.ts --dry-run
+```
+
+## Add new dependencies
+
+Search and add new dependencies to your import map file:
+
+```sh
+nudd add lume @std/path react
+```
+
+It will search the this package in `deno.land`, `jsdelivr`, `jsr` and `npm`.

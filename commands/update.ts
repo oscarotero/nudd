@@ -20,6 +20,7 @@ import { Jspm } from "../registry/jspm.ts";
 import { Denopkg } from "../registry/denopkg.ts";
 import { PaxDeno } from "../registry/paxdeno.ts";
 import { Jsr } from "../registry/jsr.ts";
+import { getImportMapFile } from "../import_map.ts";
 
 const registries: Registry[] = [
   DenoLand,
@@ -44,6 +45,11 @@ export interface UpdateOptions {
 }
 
 export default async function run(files: string[], options: UpdateOptions) {
+  if (files.length === 0) {
+    files.push(await getImportMapFile());
+    return;
+  }
+
   const spinner = new Spinner({ message: "Scanning files..." });
   spinner.start();
 

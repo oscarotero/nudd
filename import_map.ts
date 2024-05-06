@@ -12,6 +12,11 @@ export async function loadDenoConfig(): Promise<DenoConfig> {
   return JSON.parse(content || "{}") as DenoConfig;
 }
 
+export async function getImportMapFile(): Promise<string> {
+  const config = await loadDenoConfig();
+  return config.importMap || "deno.json";
+}
+
 export async function loadImportMap(): Promise<ImportMap> {
   const config = await loadDenoConfig();
 
