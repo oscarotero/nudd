@@ -15,7 +15,7 @@ The biggest differences from the original package are:
 - Removed `--test` feature.
 - Added support for `.json` files (import maps).
 - Added support for jsr.io modules.
-- Are more commands: `update`, `add`, `duplicates`.
+- Added more commands: `update`, `add`, `duplicates`.
 
 ## Install
 
