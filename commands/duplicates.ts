@@ -142,6 +142,7 @@ function fixDuplicates(packages: Packages, importMap: ImportMap) {
 
         console.log("  ", colors.red(semver));
         pkg.dependents.forEach((dep, key) => {
+          // It's already in the import map
           if (importMap.imports?.[key]) {
             console.log("    ", colors.dim(key));
             importMap.imports ??= {};
@@ -167,7 +168,7 @@ function fixDuplicates(packages: Packages, importMap: ImportMap) {
             }
             dep.imports[key] = pkg.at(latestVersion);
           } else {
-            dep.imports[key] = pkg.at(latestVersion);
+            dep.imports[pkg.url] = pkg.at(latestVersion);
           }
         });
       }
