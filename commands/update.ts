@@ -1,5 +1,6 @@
 import {
   colors,
+  dirname,
   expandGlob,
   getLatestVersion,
   parse,
@@ -42,11 +43,27 @@ const registries: Registry[] = [
 export interface UpdateOptions {
   // don't permanently edit files
   dryRun?: boolean;
+
+  // search in global scripts
+  global?: boolean;
 }
 
 export default async function run(files: string[], options: UpdateOptions) {
+  const ignored: string[] = [];
+
   if (files.length === 0) {
-    files.push(await getImportMapFile());
+    if (options.global) {
+      // Get deno binary path
+      const denoBin = Deno.execPath();
+      ignored.push(denoBin);
+      files.push(dirname(denoBin) + "/*");
+    } else {
+      files.push(await getImportMapFile());
+    }
+  }
+
+  if (files.length === 0) {
+    console.error("No files found.");
     return;
   }
 
@@ -56,7 +73,12 @@ export default async function run(files: string[], options: UpdateOptions) {
   const depFiles: string[] = [];
 
   for (const arg of files.map((x) => x.toString())) {
+    console.log(arg);
     for await (const file of expandGlob(arg)) {
+      if (ignored.includes(file.path)) {
+        continue;
+      }
+
       depFiles.push(file.path);
     }
   }

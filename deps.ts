@@ -1,6 +1,7 @@
 export { parseArgs } from "https://deno.land/std@0.223.0/cli/parse_args.ts";
 export { expandGlob } from "https://deno.land/std@0.223.0/fs/expand_glob.ts";
 export * as colors from "https://deno.land/std@0.223.0/fmt/colors.ts";
+export { dirname } from "https://deno.land/std@0.223.0/path/dirname.ts";
 export { Spinner } from "https://deno.land/std@0.223.0/cli/spinner.ts";
 import { parse as parseVersion } from "https://deno.land/std@0.223.0/semver/parse.ts";
 import { format } from "https://deno.land/std@0.223.0/semver/format.ts";

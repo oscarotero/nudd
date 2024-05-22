@@ -11,16 +11,23 @@ nudd: Deno Dependencies
 
 Commands:
   update       \tupdate dependencies
-               \t${colors.dim("nudd update one.ts two.ts ...")}
+               \t${colors.dim("nudd update one.ts two.ts three/*.ts ...")}
+
+               \t-g, --global
+               \tupdate the dependencies of Deno scripts installed globally
+               \t${colors.dim("nudd update --global")}
 
   duplicates   \tshow and fix duplicated dependencies
                \t${colors.dim("nudd duplicates main.ts")}
 
+  add          \tadd new dependencies to the import map file.
+               \t${colors.dim("nudd add @std/path")}
+
 Optional arguments:
- -h, --help   \tshow this help text
- --dry-run    \ttest what dependencies can be updated
- --upgrade    \tupdate up to the latest version
- --version    \tprint the version of up`);
+  -h, --help   \tshow this help text
+  --dry-run    \ttest what dependencies can be updated
+  --upgrade    \tupdate up to the latest version
+  --version    \tprint the version of up`);
 }
 
 function version() {
@@ -66,10 +73,11 @@ async function upgrade() {
 
 async function main(args: string[]) {
   const a = parseArgs(args, {
-    boolean: ["dry-run", "help", "version"],
+    boolean: ["dry-run", "help", "version", "global"],
     alias: {
       h: "help",
       v: "version",
+      g: "global",
     },
   });
 
@@ -89,7 +97,7 @@ async function main(args: string[]) {
   }
 
   if (command === "update") {
-    return updateCommand(rest, { dryRun: a["dry-run"] });
+    return updateCommand(rest, { dryRun: a["dry-run"], global: a.global });
   }
 
   if (command === "add") {
