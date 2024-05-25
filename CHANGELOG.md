@@ -8,6 +8,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - New `-g, --global` flag to update scripts installed globally by Deno.
 
+### Fixed
+- Parse JSR imports with `/` before the scope (for example `jsr:/@scope/name`).
+
 ## [0.2.3] - 2024-05-09
 ### Fixed
 - Duplicates with HTTP packages.
@@ -48,7 +51,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.1.0] - 2024-04-14
 First version
 
-[Unreleased]: https://github.com/oscarotero/nudd/compare/v0.2.3...HEAD
 [0.2.4]: https://github.com/oscarotero/nudd/compare/v0.2.3...HEAD
 [0.2.3]: https://github.com/oscarotero/nudd/compare/v0.2.2...v0.2.3
 [0.2.2]: https://github.com/oscarotero/nudd/compare/v0.2.1...v0.2.2

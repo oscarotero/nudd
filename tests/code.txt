@@ -20,5 +20,5 @@ import "https://unpkg.com/foo-bar@0.1.0";
 import "https://unpkg.com/@foo/bar@0.1.0/mod.ts";
 import "https://deno.re/foo/bar@0.1.0/mod.ts";
 import "jsr:@foo/bar@0.1.0";
-import "jsr:@foo/bar@0.1.0/mod.ts";
+import "jsr:/@foo/bar@0.1.0/mod.ts";
 import "https://jsr.io/@foo/bar/0.1.0/mod.ts";

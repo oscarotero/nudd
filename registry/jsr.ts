@@ -4,7 +4,7 @@ export class Jsr extends Package {
   http = false;
   static type = "jsr";
   static regexp = [
-    /jsr:\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"\s]*/,
+    /jsr:\/?\@[^/]+\/[^@/"]+(?:\@[^/"']+)?[^'"\s]*/,
     /https:\/\/jsr\.io\/\@[^/]+\/[^/"]+\/[^'"\s]*/,
   ];
 
