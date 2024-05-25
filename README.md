@@ -29,7 +29,7 @@ To update:
 nudd --upgrade
 ```
 
-## Update imports
+## Update dependencies
 
 Update the imports of the current import map file:
 
@@ -37,16 +37,22 @@ Update the imports of the current import map file:
 nudd update
 ```
 
-Update the modules imported from `deps.ts` file:
+Update the imports of the `deps.ts` file:
 
 ```sh
 nudd update deps.ts
 ```
 
-To update all the ts files in your directory:
+Update all TS files in your directory:
 
 ```sh
 nudd update *.ts
+```
+
+Update the imports of your scripts installed globally with Deno:
+
+```sh
+nudd update --global
 ```
 
 Use the `--dry-run` argument to only show outdated dependencies without update
@@ -73,10 +79,21 @@ nudd duplicates main.ts --dry-run
 
 ## Add new dependencies
 
-Search and add new dependencies to your import map file:
+Search and add a new dependency to your import map file:
 
 ```sh
-nudd add lume @std/path react
+nudd add react
 ```
 
-It will search the this package in `deno.land`, `jsdelivr`, `jsr` and `npm`.
+Search and add several dependencies at the same time:
+
+```sh
+nudd add react @std/path lume lumeland/cms
+```
+
+- Single name dependencies, (like `react` or `lume`) are searched in
+  `deno.land/x` and `npm`.
+- Scoped dependencies starting with `@` (like `@std/path`) are searched in
+  `jsr`and `npm`.
+- Scoped dependencies without `@` (like `lumeland/cms`) are searched in GitHub
+  and imported from `jsdelivr`.
