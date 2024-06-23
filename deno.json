@@ -2,7 +2,7 @@
   "lock": false,
   "tasks": {
     "test": "deno test --allow-run --allow-read --allow-write tests/test.ts",
-    "update-deps": "deno run -A ./cli.ts deps.ts tests/tests.ts",
+    "update-deps": "deno run -A ./cli.ts update deps.ts tests/tests.ts",
     "install": "deno install --allow-run --allow-read --allow-write --allow-net --name nudd --force --reload --global ./cli.ts"
   },
   "fmt": {

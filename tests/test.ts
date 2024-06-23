@@ -5,6 +5,9 @@ import { update } from "../commands/update.ts";
 const versions = Promise.resolve(["0.2.0"]);
 
 cache.set("https://cdn.deno.land/foo_bar/meta/versions.json", versions);
+cache.set("https://data.jsdelivr.com/v1/package/gh/foo/bar", versions);
+cache.set("https://data.jsdelivr.com/v1/package/npm/foo-bar", versions);
+cache.set("https://data.jsdelivr.com/v1/package/npm/@foo/bar", versions);
 cache.set("https://registry.npmjs.org/foo-bar", versions);
 cache.set("https://registry.npmjs.org/@foo/bar", versions);
 cache.set("https://api.github.com/repos/foo/bar/tags?per_page=100", versions);
