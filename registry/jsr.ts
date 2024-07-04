@@ -29,6 +29,10 @@ export class Jsr extends Package {
     return parse(Jsr, url);
   }
 
+  get packageUrl(): string {
+    return `https://jsr.io/${this.name}`;
+  }
+
   async versions(): Promise<string[]> {
     return await readJson(`https://jsr.io/${this.name}/meta.json`, (json) => {
       if (!json.versions) {

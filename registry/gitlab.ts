@@ -24,6 +24,10 @@ export class GitlabRaw extends Package {
     });
   }
 
+  get packageUrl(): string {
+    return `https://gitlab.com/${this.name}`;
+  }
+
   async versions(): Promise<string[]> {
     const id = this.name.replaceAll("/", "%2F");
 

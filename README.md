@@ -29,6 +29,23 @@ To update:
 nudd --upgrade
 ```
 
+## API
+
+```js
+import { Npm } from "nudd/registry/npm.ts";
+
+const ventojs = Npm.parse("npm:ventojs@0.12.8");
+
+ventojs.name; // ventojs
+ventojs.version; // 0.12.8
+ventojs.type; // npm
+ventojs.url; // npm:ventojs@0.12.8
+
+await ventojs.versions(); // Array with all available versions
+ventojs.at("0.12.7"); // npm:ventojs@0.12.7
+ventojs.packageUrl; // https://www.npmjs.com/package/ventojs
+```
+
 ## Update dependencies
 
 Update the imports of the current import map file:

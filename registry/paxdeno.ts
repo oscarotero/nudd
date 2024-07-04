@@ -9,6 +9,10 @@ export class PaxDeno extends Package {
     return parse(PaxDeno, url, false);
   }
 
+  get packageUrl(): string {
+    return `https://github.com/${this.name}`;
+  }
+
   async versions(): Promise<string[]> {
     return await githubVersions(this.name);
   }

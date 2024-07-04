@@ -15,6 +15,12 @@ export class JsDelivr extends Package {
     return parse(JsDelivr, url, false);
   }
 
+  get packageUrl(): string {
+    return getOrigin(this.name) === "npm"
+      ? `https://www.jsdelivr.com/package/npm/${this.name}`
+      : `https://www.jsdelivr.com/package/gh/${this.name}`;
+  }
+
   versions(): Promise<string[]> {
     const url = getOrigin(this.name) === "npm"
       ? `https://data.jsdelivr.com/v1/package/npm/${this.name}`

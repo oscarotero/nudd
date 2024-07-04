@@ -11,6 +11,10 @@ export class Unpkg extends Package {
     return parse(Unpkg, url);
   }
 
+  get packageUrl(): string {
+    return `https://www.npmjs.com/package/${this.name}`;
+  }
+
   async versions(): Promise<string[]> {
     return await npmVersions(this.name);
   }

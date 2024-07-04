@@ -23,6 +23,10 @@ export class GithubRaw extends Package {
     });
   }
 
+  get packageUrl(): string {
+    return `https://github.com/${this.name}`;
+  }
+
   versions(): Promise<string[]> {
     return githubVersions(this.name);
   }

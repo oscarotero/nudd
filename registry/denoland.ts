@@ -10,6 +10,10 @@ export class DenoLand extends Package {
     return parse(DenoLand, url);
   }
 
+  get packageUrl(): string {
+    return `https://deno.land/x/${this.name}`;
+  }
+
   async versions(): Promise<string[]> {
     const name = this.name;
     const url = `https://cdn.deno.land/${name}/meta/versions.json`;

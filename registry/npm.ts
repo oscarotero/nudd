@@ -10,6 +10,10 @@ export class Npm extends Package {
     return parse(Npm, url);
   }
 
+  get packageUrl(): string {
+    return `https://www.npmjs.com/package/${this.name}`;
+  }
+
   async versions(): Promise<string[]> {
     return await npmVersions(this.name);
   }

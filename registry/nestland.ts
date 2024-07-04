@@ -10,6 +10,10 @@ export class NestLand extends Package {
     return parse(NestLand, url);
   }
 
+  get packageUrl(): string {
+    return `https://nest.land/package/${this.name}`;
+  }
+
   async versions(): Promise<string[]> {
     const url = `https://x.nest.land/api/package/${this.name}`;
 

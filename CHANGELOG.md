@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.6] - Unreleased
+### Added
+- New `packageUrl` property to get the package landing page.
+
 ## [0.2.5] - 2024-06-23
 ### Added
 - Support for NPM packages loaded from JsDelivr.
@@ -58,6 +62,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.1.0] - 2024-04-14
 First version
 
+[0.2.6]: https://github.com/oscarotero/nudd/compare/v0.2.5...HEAD
 [0.2.5]: https://github.com/oscarotero/nudd/compare/v0.2.4...v0.2.5
 [0.2.4]: https://github.com/oscarotero/nudd/compare/v0.2.3...v0.2.4
 [0.2.3]: https://github.com/oscarotero/nudd/compare/v0.2.2...v0.2.3

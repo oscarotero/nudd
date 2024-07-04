@@ -9,6 +9,10 @@ export class DenoRe extends Package {
     return parse(DenoRe, url, false);
   }
 
+  get packageUrl(): string {
+    return `https://github.com/${this.name}`;
+  }
+
   async versions(): Promise<string[]> {
     return await githubVersions(this.name);
   }

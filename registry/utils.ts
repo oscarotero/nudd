@@ -17,6 +17,8 @@ export abstract class Package {
     return `${this.type}:${this.name}@${this.version}`;
   }
 
+  abstract get packageUrl(): string;
+
   /** Returns all available versions */
   abstract versions(): Promise<string[]>;
 
