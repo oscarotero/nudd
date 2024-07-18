@@ -8,6 +8,11 @@ export class Jspm extends Package {
     /https?:\/\/jspm.dev\/[^/"']*?\@[^'"\s]*/,
   ];
 
+  static create(name: string): Promise<Jspm> {
+    return new Jspm({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): Jspm {
     return parse(Jspm, url);
   }

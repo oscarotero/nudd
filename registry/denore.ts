@@ -5,6 +5,11 @@ export class DenoRe extends Package {
   static type = "denore";
   static regexp = [/https?:\/\/deno.re\/[^/"']*?\/[^/"']*?\@[^'"\s]*/];
 
+  static create(name: string): Promise<DenoRe> {
+    return new DenoRe({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): DenoRe {
     return parse(DenoRe, url, false);
   }

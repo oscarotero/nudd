@@ -42,6 +42,7 @@ ventojs.type; // npm
 ventojs.url; // npm:ventojs@0.12.8
 
 await ventojs.versions(); // Array with all available versions
+await ventojs.latestVersion(); // Returns the latest stable version of the package
 ventojs.at("0.12.7"); // npm:ventojs@0.12.7
 ventojs.packageUrl; // https://www.npmjs.com/package/ventojs
 ```

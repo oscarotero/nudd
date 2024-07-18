@@ -8,6 +8,11 @@ export class JsDelivr extends Package {
     /https?:\/\/cdn\.jsdelivr\.net\/npm\/[^/"']+@[^'"\s]*/,
   ];
 
+  static create(name: string): Promise<JsDelivr> {
+    return new JsDelivr({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): JsDelivr {
     if (url.includes("cdn.jsdelivr.net/npm/")) {
       return parse(JsDelivr, url, true);

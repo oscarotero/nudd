@@ -8,6 +8,11 @@ export class Jsr extends Package {
     /https:\/\/jsr\.io\/\@[^/]+\/[^/"]+\/[^'"\s]*/,
   ];
 
+  static create(name: string): Promise<Jsr> {
+    return new Jsr({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): Package {
     if (url.startsWith("https:")) {
       const match = url.match(/(@[^/]+\/[^/]+)\/([^/]+)(.*)$/);
@@ -17,7 +22,6 @@ export class Jsr extends Package {
       }
 
       const pkg = new Jsr({
-        url,
         version: match[2],
         name: match[1],
         file: match[3],

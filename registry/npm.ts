@@ -6,6 +6,11 @@ export class Npm extends Package {
     /npm:(\@[^/]+\/[^@/]+|[^@/]+)(?:\@[^/"'\s]+)?[^'"\s]*/,
   ];
 
+  static create(name: string): Promise<Npm> {
+    return new Npm({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): Npm {
     return parse(Npm, url);
   }

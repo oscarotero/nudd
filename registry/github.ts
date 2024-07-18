@@ -6,6 +6,11 @@ export class GithubRaw extends Package {
     /https?:\/\/raw\.githubusercontent\.com\/[^/"']+\/[^/"']+\/(?!master)[^/"']+\/[^'"\s]*/,
   ];
 
+  static create(name: string): Promise<GithubRaw> {
+    return new GithubRaw({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): GithubRaw {
     const match = url.match(
       /https?:\/\/raw\.githubusercontent\.com\/([^/]+\/[^/]+)\/([^/]+)(.*)/,
@@ -15,7 +20,6 @@ export class GithubRaw extends Package {
       throw new Error(`Unable to parse ${url}`);
     }
     return new GithubRaw({
-      url,
       name: match[1],
       version: match[2],
       file: match[3],

@@ -7,6 +7,11 @@ export class Unpkg extends Package {
     /https?:\/\/unpkg.com\/[^/"']*?\@[^'"\s]*/,
   ];
 
+  static create(name: string): Promise<Unpkg> {
+    return new Unpkg({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): Unpkg {
     return parse(Unpkg, url);
   }

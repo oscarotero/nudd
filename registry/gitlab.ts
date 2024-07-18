@@ -6,6 +6,11 @@ export class GitlabRaw extends Package {
     /https?:\/\/gitlab\.com\/[^/"']+\/[^/"']+\/-\/raw\/(?!master)[^/"']+\/[^'"\s]*/,
   ];
 
+  static create(name: string): Promise<GitlabRaw> {
+    return new GitlabRaw({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): GitlabRaw {
     const match = url.match(
       /https?:\/\/gitlab\.com\/([^/]+\/[^/]+)\/-\/raw\/([^/]+)(.*)/,
@@ -16,7 +21,6 @@ export class GitlabRaw extends Package {
     }
 
     return new GitlabRaw({
-      url,
       name: match[1],
       version: match[2],
       file: match[3],

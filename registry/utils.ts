@@ -1,20 +1,34 @@
+import { getLatestVersion } from "../deps.ts";
+
 export abstract class Package {
   readonly type: string;
   readonly name: string;
-  readonly version: string;
-  url: string;
+  version: string;
   file: string;
 
   constructor(data: PackageData) {
     this.version = data.version;
     this.name = data.name;
     this.file = data.file || "";
-    this.url = data.url || this.at();
     this.type = data.type;
   }
 
   get id(): string {
     return `${this.type}:${this.name}@${this.version}`;
+  }
+
+  get url() {
+    return this.at();
+  }
+
+  async latestVersion(): Promise<string> {
+    const versions = await this.versions();
+    return getLatestVersion(versions);
+  }
+
+  async toLatestVersion(): Promise<this> {
+    this.version = await this.latestVersion();
+    return this;
   }
 
   abstract get packageUrl(): string;
@@ -38,7 +52,6 @@ export function parse(
 
   if (match) {
     return new Registry({
-      url,
       version: match[3],
       name: `${match[1]}/${match[2]}`,
       file: match[4],
@@ -51,7 +64,6 @@ export function parse(
 
   if (match) {
     return new Registry({
-      url,
       version: match[2],
       name: match[1],
       file: match[3],
@@ -64,13 +76,13 @@ export function parse(
 
 export interface Registry {
   new (data: PackageData): Package;
+  create(name: string): Promise<Package>;
   parse(url: string): Package;
   regexp: RegExp[];
   type: string;
 }
 
 export interface PackageData {
-  url?: string;
   version: string;
   name: string;
   file?: string;

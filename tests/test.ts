@@ -1,6 +1,7 @@
 import { assertEquals } from "https://deno.land/std@0.222.1/assert/assert_equals.ts";
 import { cache } from "../registry/utils.ts";
 import { update } from "../commands/update.ts";
+import { registries } from "../registries.ts";
 
 const versions = Promise.resolve(["0.2.0"]);
 
@@ -38,4 +39,39 @@ Deno.test("Update dependencies in import maps", async () => {
   const expected = await Deno.readTextFile("tests/import-map-expected.json");
 
   assertEquals(result, expected);
+});
+
+Deno.test("Create packages", async () => {
+  for (const registry of registries) {
+    let name = "";
+    switch (registry.type) {
+      case "denoland":
+        name = "foo_bar";
+        break;
+      case "jspm":
+      case "unpkg":
+      case "nestland":
+        name = "foo-bar";
+        break;
+      case "jsdelivr":
+      case "github":
+      case "gitlab":
+      case "paxdeno":
+      case "denopkg":
+      case "denore":
+        name = "foo/bar";
+        break;
+      case "npm":
+      case "esm.sh":
+      case "jsr":
+      case "skypack":
+        name = "@foo/bar";
+        break;
+    }
+
+    const pkg = await registry.create(name);
+    assertEquals(pkg.name, name);
+    assertEquals(pkg.version, "0.2.0");
+    assertEquals(pkg.file, "");
+  }
 });

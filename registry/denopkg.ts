@@ -5,6 +5,11 @@ export class Denopkg extends Package {
   static type = "denopkg";
   static regexp = [/https?:\/\/denopkg.com\/[^/"']*?\/[^/"']*?\@[^'"\s]*/];
 
+  static create(name: string): Promise<Denopkg> {
+    return new Denopkg({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): Denopkg {
     return parse(Denopkg, url, false);
   }

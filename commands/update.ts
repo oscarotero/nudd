@@ -1,44 +1,7 @@
-import {
-  colors,
-  dirname,
-  expandGlob,
-  getLatestVersion,
-  parse,
-  Spinner,
-} from "../deps.ts";
-import { Package, Registry } from "../registry/utils.ts";
-import { DenoLand } from "../registry/denoland.ts";
-import { DenoRe } from "../registry/denore.ts";
-import { JsDelivr } from "../registry/jsdelivr.ts";
-import { Npm } from "../registry/npm.ts";
-import { GithubRaw } from "../registry/github.ts";
-import { GitlabRaw } from "../registry/gitlab.ts";
-import { Unpkg } from "../registry/unpkg.ts";
-import { Skypack } from "../registry/skypack.ts";
-import { EsmSh } from "../registry/esm.ts";
-import { NestLand } from "../registry/nestland.ts";
-import { Jspm } from "../registry/jspm.ts";
-import { Denopkg } from "../registry/denopkg.ts";
-import { PaxDeno } from "../registry/paxdeno.ts";
-import { Jsr } from "../registry/jsr.ts";
+import { colors, dirname, expandGlob, parse, Spinner } from "../deps.ts";
+import type { Package } from "../registry/utils.ts";
+import { registries } from "../registries.ts";
 import { getImportMapFile } from "../import_map.ts";
-
-const registries: Registry[] = [
-  DenoLand,
-  Unpkg,
-  Denopkg,
-  DenoRe,
-  PaxDeno,
-  Jspm,
-  Skypack,
-  EsmSh,
-  GithubRaw,
-  GitlabRaw,
-  JsDelivr,
-  NestLand,
-  Npm,
-  Jsr,
-];
 
 export interface UpdateOptions {
   // don't permanently edit files
@@ -169,9 +132,8 @@ async function updateCode(
   let changed = false;
   const packages = codeUrls(content);
 
-  for (const pkg of packages) {
-    const initUrl: string = pkg.url!;
-    const initVersion: string = pkg.version;
+  for (const [initUrl, pkg] of packages) {
+    const initVersion = pkg.version;
 
     try {
       parse(initVersion);
@@ -181,7 +143,7 @@ async function updateCode(
       continue;
     }
 
-    const newVersion = getLatestVersion(await pkg.versions());
+    const newVersion = await pkg.latestVersion();
     if (initVersion === newVersion) {
       results.push({ initUrl, initVersion });
       continue;
@@ -224,7 +186,7 @@ async function updateImportMap(
       for (const R of registries) {
         if (R.regexp.some((r) => r.test(initUrl))) {
           const v = R.parse(initUrl);
-          const newVersion = getLatestVersion(await v.versions());
+          const newVersion = await v.latestVersion();
 
           if (v.version !== newVersion && !options.dryRun) {
             json.imports[key] = v.at(newVersion);
@@ -252,8 +214,8 @@ async function updateImportMap(
   return changed ? json : undefined;
 }
 
-function codeUrls(content: string): Package[] {
-  const packages: Package[] = [];
+function codeUrls(content: string): Map<string, Package> {
+  const packages: Map<string, Package> = new Map();
 
   for (const R of registries) {
     const allRegexp = R.regexp.map((r) =>
@@ -262,9 +224,13 @@ function codeUrls(content: string): Package[] {
 
     for (const regexp of allRegexp) {
       const match = content.match(regexp);
-      match?.forEach((url) =>
-        packages.push(R.parse(url.replace(/['"\s]/g, "") as string))
-      );
+      match?.forEach((url) => {
+        const cleanUrl = url
+          .replace(/^[^'"\s]*['"\s]+/g, "")
+          .replace(/['"\s]+[^'"\s]*/g, "");
+        packages.set(cleanUrl, R.parse(cleanUrl));
+        content = content.replace(url, "");
+      });
     }
   }
 

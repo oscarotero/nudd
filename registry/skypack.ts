@@ -4,11 +4,16 @@ import { npmVersions } from "./npm.ts";
 export class Skypack extends Package {
   static type = "skypack";
   static regexp = [
-    /https?:\/\/cdn.skypack.dev(\/\_)?\/[^/"']*?\@[^'"\s]*/,
+    /https?:\/\/cdn\.skypack\.dev(\/\_)?\/[^/"']*?\@[^'"\s]*/,
     /https?:\/\/cdn\.skypack\.dev(\/\_)?\/@[^/"']*?\/[^/"']*?\@[^'"\s]*/,
-    /https?:\/\/cdn.pika.dev(\/\_)?\/[^/"']*?\@[^'"\s]*/,
+    /https?:\/\/cdn\.pika.dev(\/\_)?\/[^/"']*?\@[^'"\s]*/,
     /https?:\/\/cdn\.pika\.dev(\/\_)?\/@[^/"']*?\/[^/"']*?\@[^'"\s]*/,
   ];
+
+  static create(name: string): Promise<Skypack> {
+    return new Skypack({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
 
   static parse(url: string): Skypack {
     return parse(Skypack, url);

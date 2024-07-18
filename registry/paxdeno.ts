@@ -5,6 +5,11 @@ export class PaxDeno extends Package {
   static type = "paxdeno";
   static regexp = [/https?:\/\/pax.deno.dev\/[^/"']*?\/[^/"']*?\@[^'"\s]*/];
 
+  static create(name: string): Promise<PaxDeno> {
+    return new PaxDeno({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): PaxDeno {
     return parse(PaxDeno, url, false);
   }

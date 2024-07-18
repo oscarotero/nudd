@@ -6,6 +6,11 @@ export class DenoLand extends Package {
     /https?:\/\/deno.land\/(?:std\@[^'"]*|x\/[^/"']*?\@[^'"\s]*)/,
   ];
 
+  static create(name: string): Promise<DenoLand> {
+    return new DenoLand({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): DenoLand {
     return parse(DenoLand, url);
   }

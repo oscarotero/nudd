@@ -8,6 +8,11 @@ export class EsmSh extends Package {
     /https?:\/\/esm\.sh\/@[^/"']*?\/[^/"']*?\@[^'"\s]*/,
   ];
 
+  static create(name: string): Promise<EsmSh> {
+    return new EsmSh({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): EsmSh {
     return parse(EsmSh, url);
   }

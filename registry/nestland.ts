@@ -6,6 +6,11 @@ export class NestLand extends Package {
     /https?:\/\/x\.nest\.land\/[^/"']+@(?!master)[^/"']+\/[^'"\s]*/,
   ];
 
+  static create(name: string): Promise<NestLand> {
+    return new NestLand({ name, version: "0.0.0", type: this.type })
+      .toLatestVersion();
+  }
+
   static parse(url: string): NestLand {
     return parse(NestLand, url);
   }
