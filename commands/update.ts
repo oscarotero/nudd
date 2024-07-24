@@ -151,7 +151,7 @@ async function updateCode(
 
     if (!options.dryRun) {
       const newUrl = pkg.at(newVersion);
-      content = content.replace(initUrl, newUrl);
+      content = content.replaceAll(initUrl, newUrl);
       changed = true;
     }
 
@@ -229,7 +229,7 @@ function codeUrls(content: string): Map<string, Package> {
           .replace(/^[^'"\s]*['"\s]+/g, "")
           .replace(/['"\s]+[^'"\s]*/g, "");
         packages.set(cleanUrl, R.parse(cleanUrl));
-        content = content.replace(url, "");
+        content = content.replaceAll(url, "");
       });
     }
   }
