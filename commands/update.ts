@@ -217,6 +217,10 @@ async function updateImportMap(
 function codeUrls(content: string): Map<string, Package> {
   const packages: Map<string, Package> = new Map();
 
+  content = content.split("\n").filter((line) => !line.trim().startsWith("//"))
+    .join("\n");
+  // content = content.replaceAll(/^\/\/.*$/g, ""); // remove comments
+
   for (const R of registries) {
     const allRegexp = R.regexp.map((r) =>
       new RegExp(`['"\\s]${r.source}['"\\s$]`, "g")
