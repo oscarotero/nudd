@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.9] - 2025-01-09
+### Fixed
+- Parse error caused by `"npm:"` string.
+
 ## [0.2.8] - 2024-07-24
 ### Fixed
 - Update multiple imports of the same specifier in the same file.
@@ -72,6 +76,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.1.0] - 2024-04-14
 First version
 
+[0.2.9]: https://github.com/oscarotero/nudd/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/oscarotero/nudd/compare/v0.2.7...v0.2.8
 [0.2.7]: https://github.com/oscarotero/nudd/compare/v0.2.6...v0.2.7
 [0.2.6]: https://github.com/oscarotero/nudd/compare/v0.2.5...v0.2.6
