@@ -165,9 +165,14 @@ async function updateCode(
   return changed ? content : undefined;
 }
 
+interface Task {
+  command: string;
+  [key: string]: unknown;
+}
+
 interface ImportMap {
   imports?: Record<string, string>;
-  tasks?: Record<string, string>; // only in deno.json
+  tasks?: Record<string, string | Task>; // only in deno.json
 }
 
 async function updateImportMap(
@@ -203,9 +208,14 @@ async function updateImportMap(
   }
   if (json.tasks) {
     for (const [key, command] of Object.entries(json.tasks)) {
-      const updatedCommand = await updateCode(command + " ", options, results);
+      const updatedCommand = typeof command === "string"
+        ? await updateCode(command + " ", options, results)
+        : await updateCode(command.command + " ", options, results);
+
       if (updatedCommand) {
-        json.tasks[key] = updatedCommand.slice(0, -1);
+        json.tasks[key] = typeof command === "string"
+          ? updatedCommand.slice(0, -1)
+          : { ...command, command: updatedCommand.slice(0, -1) };
         changed = true;
       }
     }
