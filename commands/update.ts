@@ -165,14 +165,50 @@ async function updateCode(
   return changed ? content : undefined;
 }
 
+async function updateImportUrl(
+  initUrl: string,
+  options: UpdateOptions,
+  results: UpdateResult[],
+): Promise<string | undefined> {
+  for (const R of registries) {
+    if (R.regexp.some((r) => r.test(initUrl))) {
+      const v = R.parse(initUrl);
+      const newVersion = await v.latestVersion();
+
+      if (v.version !== newVersion && !options.dryRun) {
+        results.push({ initUrl, initVersion: v.version, newVersion });
+        return v.at(newVersion);
+      }
+
+      results.push({ initUrl, initVersion: v.version });
+      break;
+    }
+  }
+
+  return undefined;
+}
+
 interface Task {
   command: string;
   [key: string]: unknown;
 }
 
+interface Lint {
+  plugins?: string[];
+  [key: string]: unknown;
+}
+
+interface CompilerOptions {
+  types?: string[];
+  [key: string]: unknown;
+}
+
 interface ImportMap {
   imports?: Record<string, string>;
-  tasks?: Record<string, string | Task>; // only in deno.json
+  // only in deno.json
+  tasks?: Record<string, string | Task>;
+  lint?: Lint;
+  compilerOptions?: CompilerOptions;
 }
 
 async function updateImportMap(
@@ -182,30 +218,23 @@ async function updateImportMap(
 ): Promise<ImportMap | undefined> {
   let changed = false;
 
-  if (!json.imports && !json.tasks) {
+  if (
+    !json.imports && !json.tasks && !json.lint?.plugins &&
+    !json.compilerOptions?.types
+  ) {
     return;
   }
 
   if (json.imports) {
     for (const [key, initUrl] of Object.entries(json.imports)) {
-      for (const R of registries) {
-        if (R.regexp.some((r) => r.test(initUrl))) {
-          const v = R.parse(initUrl);
-          const newVersion = await v.latestVersion();
-
-          if (v.version !== newVersion && !options.dryRun) {
-            json.imports[key] = v.at(newVersion);
-            results.push({ initUrl, initVersion: v.version, newVersion });
-            changed = true;
-            break;
-          }
-
-          results.push({ initUrl, initVersion: v.version });
-          break;
-        }
+      const updatedUrl = await updateImportUrl(initUrl, options, results);
+      if (updatedUrl) {
+        json.imports[key] = updatedUrl;
+        changed = true;
       }
     }
   }
+
   if (json.tasks) {
     for (const [key, command] of Object.entries(json.tasks)) {
       const updatedCommand = typeof command === "string"
@@ -216,6 +245,26 @@ async function updateImportMap(
         json.tasks[key] = typeof command === "string"
           ? updatedCommand.slice(0, -1)
           : { ...command, command: updatedCommand.slice(0, -1) };
+        changed = true;
+      }
+    }
+  }
+
+  if (json.lint?.plugins) {
+    for (const [index, initUrl] of json.lint.plugins.entries()) {
+      const updatedUrl = await updateImportUrl(initUrl, options, results);
+      if (updatedUrl) {
+        json.lint.plugins[index] = updatedUrl;
+        changed = true;
+      }
+    }
+  }
+
+  if (json.compilerOptions?.types) {
+    for (const [index, initUrl] of json.compilerOptions?.types.entries()) {
+      const updatedUrl = await updateImportUrl(initUrl, options, results);
+      if (updatedUrl) {
+        json.compilerOptions.types[index] = updatedUrl;
         changed = true;
       }
     }
