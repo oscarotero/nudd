@@ -80,21 +80,6 @@ them:
 nudd update --dry-run
 ```
 
-## Detect duplicated dependencies
-
-Detect and fix multiple versions of the same package:
-
-```sh
-nudd duplicates main.ts
-```
-
-Use the `--dry-run` argument to only show duplicated dependencies without fix
-them:
-
-```sh
-nudd duplicates main.ts --dry-run
-```
-
 ## Add new dependencies
 
 Search and add a new dependency to your import map file:

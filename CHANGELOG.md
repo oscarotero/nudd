@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.11] - 2025-12-25
+### Added
+- Support `lint.plugins` and `compilerOptions.types` fields inside deno.json [#2]
+
 ## [0.2.10] - 2025-06-11
 ### Added
 - Support for Deno tasks as objects instead of strings.
@@ -80,6 +84,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ## [0.1.0] - 2024-04-14
 First version
 
+[#2]: https://github.com/oscarotero/nudd/issues/2
+
+[0.2.11]: https://github.com/oscarotero/nudd/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/oscarotero/nudd/compare/v0.2.9...v0.2.10
 [0.2.9]: https://github.com/oscarotero/nudd/compare/v0.2.8...v0.2.9
 [0.2.8]: https://github.com/oscarotero/nudd/compare/v0.2.7...v0.2.8
