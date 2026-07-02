@@ -1,4 +1,5 @@
-import { Package, parse, readJson } from "./utils.ts";
+import { npmVersions } from "./npm.ts";
+import { Package, parse, readJson, Version } from "./utils.ts";
 
 export class JsDelivr extends Package {
   static type = "jsdelivr";
@@ -26,12 +27,14 @@ export class JsDelivr extends Package {
       : `https://www.jsdelivr.com/package/gh/${this.name}`;
   }
 
-  versions(): Promise<string[]> {
-    const url = getOrigin(this.name) === "npm"
-      ? `https://data.jsdelivr.com/v1/package/npm/${this.name}`
-      : `https://data.jsdelivr.com/v1/package/gh/${this.name}`;
+  versions(): Promise<Version[]> {
+    if (getOrigin(this.name) === "npm") {
+      return npmVersions(this.name);
+    }
 
-    return readJson(url, (data) => data.versions);
+    return readJson(`https://data.jsdelivr.com/v1/package/gh/${this.name}`,
+      (data) => data.versions.map((v: string) => [v, undefined])
+    );
   }
 
   at(version = this.version, file = this.file): string {

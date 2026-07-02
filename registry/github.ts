@@ -1,4 +1,4 @@
-import { Package, readJson } from "./utils.ts";
+import { Package, readJson, Version } from "./utils.ts";
 
 export class GithubRaw extends Package {
   static type = "github";
@@ -31,7 +31,7 @@ export class GithubRaw extends Package {
     return `https://github.com/${this.name}`;
   }
 
-  versions(): Promise<string[]> {
+  versions(): Promise<Version[]> {
     return githubVersions(this.name);
   }
 
@@ -40,9 +40,9 @@ export class GithubRaw extends Package {
   }
 }
 
-export async function githubVersions(repo: string): Promise<string[]> {
+export async function githubVersions(repo: string): Promise<Version[]> {
   const url = `https://api.github.com/repos/${repo}/tags?per_page=100`;
   return await readJson(url, (json) =>
     // deno-lint-ignore no-explicit-any
-    json.map((x: any) => x.name));
+    json.map((x: any) => [x.name, undefined]));
 }

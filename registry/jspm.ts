@@ -1,4 +1,4 @@
-import { Package, parse } from "./utils.ts";
+import { Package, parse, Version } from "./utils.ts";
 import { npmVersions } from "./npm.ts";
 
 export class Jspm extends Package {
@@ -21,7 +21,7 @@ export class Jspm extends Package {
     return `https://www.npmjs.com/package/${this.name}`;
   }
 
-  async versions(): Promise<string[]> {
+  async versions(): Promise<Version[]> {
     return await npmVersions(this.name);
   }
 

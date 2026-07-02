@@ -23,14 +23,17 @@ export function parse(version: string): Version {
   return parseVersion(version);
 }
 
-export function getLatestVersion(versions: string[]): string {
+export function getLatestVersion(versions: [string, string | undefined][], minimumAge?: string): string {
   const validVersions: Version[] = [];
 
-  for (const version of versions) {
+  for (const [version, age] of versions) {
     try {
       const parsed = parse(version);
 
       if (parsed.prerelease?.length) {
+        continue;
+      }
+      if (minimumAge && age && age > minimumAge) {
         continue;
       }
       validVersions.push(parsed);

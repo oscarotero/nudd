@@ -21,20 +21,20 @@ export abstract class Package {
     return this.at();
   }
 
-  async latestVersion(): Promise<string> {
+  async latestVersion(minimumAge?: string): Promise<string> {
     const versions = await this.versions();
-    return getLatestVersion(versions);
+    return getLatestVersion(versions, minimumAge);
   }
 
-  async toLatestVersion(): Promise<this> {
-    this.version = await this.latestVersion();
+  async toLatestVersion(minimumAge?: string): Promise<this> {
+    this.version = await this.latestVersion(minimumAge);
     return this;
   }
 
   abstract get packageUrl(): string;
 
-  /** Returns all available versions */
-  abstract versions(): Promise<string[]>;
+  /** Returns all available versions [version, date] */
+  abstract versions(): Promise<[string, string | undefined][]>;
 
   /** Returns a URL with a specific version/file */
   abstract at(version?: string, file?: string): string;
@@ -89,13 +89,14 @@ export interface PackageData {
   type: string;
 }
 
-export const cache: Map<string, Promise<string[]>> = new Map();
+export type Version = [string, string | undefined];
+export const cache: Map<string, Promise<Version[]>> = new Map();
 
 export function readJson(
   url: string,
   // deno-lint-ignore no-explicit-any
-  cb: (json: any) => string[],
-): Promise<string[]> {
+  cb: (json: any) => Version[],
+): Promise<Version[]> {
   if (cache.has(url)) {
     return cache.get(url)!;
   }

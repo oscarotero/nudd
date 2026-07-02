@@ -4,15 +4,21 @@ import { registries } from "../registries.ts";
 import { getImportMapFile } from "../import_map.ts";
 
 export interface UpdateOptions {
-  // don't permanently edit files
+  /** don't permanently edit files */
   dryRun?: boolean;
 
-  // search in global scripts
+  /** search in global scripts */
   global?: boolean;
+
+  /** Minimum age in hours */
+  minimumAge?: number;
 }
 
 export default async function run(files: string[], options: UpdateOptions) {
   const ignored: string[] = [];
+  const age = new Date();
+  age.setTime(age.getTime() - ((options.minimumAge ?? 0) * 1000 * 60 * 60));
+  const minimumAge = age.toISOString();
 
   if (files.length === 0) {
     if (options.global) {
@@ -61,7 +67,7 @@ export default async function run(files: string[], options: UpdateOptions) {
   const results: UpdateResult[] = [];
 
   await Promise.all(depFiles.map(async (filename) => {
-    results.push(...await update(filename, options));
+    results.push(...await update(filename, options, minimumAge));
   }));
 
   spinner.stop();
@@ -98,13 +104,14 @@ export interface UpdateResult {
 export async function update(
   filename: string,
   options: UpdateOptions,
+  minimumAge?: string,
 ): Promise<UpdateResult[]> {
   const results: UpdateResult[] = [];
   const content = Deno.readTextFileSync(filename);
 
   if (filename.endsWith(".json")) {
     const map = JSON.parse(content) as ImportMap;
-    const updatedMap = await updateImportMap(map, options, results);
+    const updatedMap = await updateImportMap(map, options, results, minimumAge);
 
     if (updatedMap) {
       Deno.writeTextFileSync(
@@ -115,7 +122,7 @@ export async function update(
     return results;
   }
 
-  const updatedContent = await updateCode(content, options, results);
+  const updatedContent = await updateCode(content, options, results, minimumAge);
 
   if (updatedContent) {
     Deno.writeTextFileSync(filename, updatedContent);
@@ -128,6 +135,7 @@ async function updateCode(
   content: string,
   options: UpdateOptions,
   results: UpdateResult[],
+  minimumAge?: string,
 ): Promise<string | undefined> {
   let changed = false;
   const packages = codeUrls(content);
@@ -143,7 +151,7 @@ async function updateCode(
       continue;
     }
 
-    const newVersion = await pkg.latestVersion();
+    const newVersion = await pkg.latestVersion(minimumAge);
     if (initVersion === newVersion) {
       results.push({ initUrl, initVersion });
       continue;
@@ -169,11 +177,12 @@ async function updateImportUrl(
   initUrl: string,
   options: UpdateOptions,
   results: UpdateResult[],
+  minimumAge?: string,
 ): Promise<string | undefined> {
   for (const R of registries) {
     if (R.regexp.some((r) => r.test(initUrl))) {
       const v = R.parse(initUrl);
-      const newVersion = await v.latestVersion();
+      const newVersion = await v.latestVersion(minimumAge);
 
       if (v.version !== newVersion && !options.dryRun) {
         results.push({ initUrl, initVersion: v.version, newVersion });
@@ -215,6 +224,7 @@ async function updateImportMap(
   json: ImportMap,
   options: UpdateOptions,
   results: UpdateResult[],
+  minimumAge?: string,
 ): Promise<ImportMap | undefined> {
   let changed = false;
 
@@ -227,7 +237,7 @@ async function updateImportMap(
 
   if (json.imports) {
     for (const [key, initUrl] of Object.entries(json.imports)) {
-      const updatedUrl = await updateImportUrl(initUrl, options, results);
+      const updatedUrl = await updateImportUrl(initUrl, options, results, minimumAge);
       if (updatedUrl) {
         json.imports[key] = updatedUrl;
         changed = true;
@@ -238,8 +248,8 @@ async function updateImportMap(
   if (json.tasks) {
     for (const [key, command] of Object.entries(json.tasks)) {
       const updatedCommand = typeof command === "string"
-        ? await updateCode(command + " ", options, results)
-        : await updateCode(command.command + " ", options, results);
+        ? await updateCode(command + " ", options, results, minimumAge)
+        : await updateCode(command.command + " ", options, results, minimumAge);
 
       if (updatedCommand) {
         json.tasks[key] = typeof command === "string"
@@ -252,7 +262,7 @@ async function updateImportMap(
 
   if (json.lint?.plugins) {
     for (const [index, initUrl] of json.lint.plugins.entries()) {
-      const updatedUrl = await updateImportUrl(initUrl, options, results);
+      const updatedUrl = await updateImportUrl(initUrl, options, results, minimumAge);
       if (updatedUrl) {
         json.lint.plugins[index] = updatedUrl;
         changed = true;
@@ -262,7 +272,7 @@ async function updateImportMap(
 
   if (json.compilerOptions?.types) {
     for (const [index, initUrl] of json.compilerOptions?.types.entries()) {
-      const updatedUrl = await updateImportUrl(initUrl, options, results);
+      const updatedUrl = await updateImportUrl(initUrl, options, results, minimumAge);
       if (updatedUrl) {
         json.compilerOptions.types[index] = updatedUrl;
         changed = true;

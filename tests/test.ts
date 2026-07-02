@@ -1,9 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.222.1/assert/assert_equals.ts";
-import { cache } from "../registry/utils.ts";
+import { cache, Version } from "../registry/utils.ts";
 import { update } from "../commands/update.ts";
 import { registries } from "../registries.ts";
 
-const versions = Promise.resolve(["0.2.0"]);
+const versions = Promise.resolve([["0.2.0", undefined]] as Version[]);
 
 cache.set("https://cdn.deno.land/foo_bar/meta/versions.json", versions);
 cache.set("https://data.jsdelivr.com/v1/package/gh/foo/bar", versions);

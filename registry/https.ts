@@ -1,4 +1,4 @@
-import { Package } from "./utils.ts";
+import { Package, Version } from "./utils.ts";
 import { join } from "../deps.ts";
 
 export class Https extends Package {
@@ -23,8 +23,8 @@ export class Https extends Package {
     return this.name;
   }
 
-  versions(): Promise<string[]> {
-    return Promise.resolve(["0.0.0"]);
+  versions(): Promise<Version[]> {
+    return Promise.resolve([["0.0.0", undefined]]);
   }
 
   at(_ = this.version, file = this.file): string {

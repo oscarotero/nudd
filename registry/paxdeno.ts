@@ -1,4 +1,4 @@
-import { Package, parse } from "./utils.ts";
+import { Package, parse, Version } from "./utils.ts";
 import { githubVersions } from "./github.ts";
 
 export class PaxDeno extends Package {
@@ -18,7 +18,7 @@ export class PaxDeno extends Package {
     return `https://github.com/${this.name}`;
   }
 
-  async versions(): Promise<string[]> {
+  async versions(): Promise<Version[]> {
     return await githubVersions(this.name);
   }
 

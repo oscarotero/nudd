@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.13] - 2026-07-02
+### Added
+- New `min-age` option, to prevent to upgrade to version released after a specific limit.
+  For example: `min-age=24` (don't upgrade to versions newer than 24 hours ago)
+
 ## [0.2.12] - 2026-06-15
 ### Added
 - `Https` registry for packages without a known registry.
@@ -90,6 +95,7 @@ First version
 
 [#2]: https://github.com/oscarotero/nudd/issues/2
 
+[0.2.13]: https://github.com/oscarotero/nudd/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/oscarotero/nudd/compare/v0.2.11...v0.2.12
 [0.2.11]: https://github.com/oscarotero/nudd/compare/v0.2.10...v0.2.11
 [0.2.10]: https://github.com/oscarotero/nudd/compare/v0.2.9...v0.2.10

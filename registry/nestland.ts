@@ -1,4 +1,4 @@
-import { Package, parse, readJson } from "./utils.ts";
+import { Package, parse, readJson, Version } from "./utils.ts";
 
 export class NestLand extends Package {
   static type = "nestland";
@@ -19,14 +19,14 @@ export class NestLand extends Package {
     return `https://nest.land/package/${this.name}`;
   }
 
-  async versions(): Promise<string[]> {
+  async versions(): Promise<Version[]> {
     const url = `https://x.nest.land/api/package/${this.name}`;
 
     return await readJson(
       url,
       (json) =>
         (json.packageUploadNames || []).map((name: string) =>
-          name.split("@")[1]
+          [name.split("@")[1], undefined]
         ),
     );
   }

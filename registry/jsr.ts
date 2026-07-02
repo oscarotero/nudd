@@ -1,4 +1,4 @@
-import { Package, parse, readJson } from "./utils.ts";
+import { Package, parse, readJson, Version } from "./utils.ts";
 
 export class Jsr extends Package {
   http = false;
@@ -37,12 +37,12 @@ export class Jsr extends Package {
     return `https://jsr.io/${this.name}`;
   }
 
-  async versions(): Promise<string[]> {
+  async versions(): Promise<Version[]> {
     return await readJson(`https://jsr.io/${this.name}/meta.json`, (json) => {
       if (!json.versions) {
         throw new Error(`versions.json for ${this.name} has incorrect format`);
       }
-      return Object.keys(json.versions);
+      return Object.entries(json.versions).map(([v, info]: any) => [v, info.createdAt]);
     });
   }
 

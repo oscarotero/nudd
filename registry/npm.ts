@@ -1,4 +1,4 @@
-import { Package, parse, readJson } from "./utils.ts";
+import { Package, parse, readJson, Version } from "./utils.ts";
 
 export class Npm extends Package {
   static type = "npm";
@@ -19,7 +19,7 @@ export class Npm extends Package {
     return `https://www.npmjs.com/package/${this.name}`;
   }
 
-  async versions(): Promise<string[]> {
+  async versions(): Promise<Version[]> {
     return await npmVersions(this.name);
   }
 
@@ -28,11 +28,13 @@ export class Npm extends Package {
   }
 }
 
-export function npmVersions(name: string): Promise<string[]> {
+export function npmVersions(name: string): Promise<Version[]> {
   return readJson(`https://registry.npmjs.org/${name}`, (json) => {
     if (!json.versions) {
       throw new Error(`versions.json for ${name} has incorrect format`);
     }
-    return Object.keys(json.versions);
+    const time = json.time;
+
+    return Object.keys(json.versions).map((v) => [v, time[v]]);
   });
 }

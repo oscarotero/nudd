@@ -1,4 +1,4 @@
-import { Package, parse, readJson } from "./utils.ts";
+import { Package, parse, readJson, Version } from "./utils.ts";
 
 export class DenoLand extends Package {
   static type = "denoland";
@@ -19,7 +19,7 @@ export class DenoLand extends Package {
     return `https://deno.land/x/${this.name}`;
   }
 
-  async versions(): Promise<string[]> {
+  async versions(): Promise<Version[]> {
     const name = this.name;
     const url = `https://cdn.deno.land/${name}/meta/versions.json`;
 
@@ -27,7 +27,7 @@ export class DenoLand extends Package {
       if (!json.versions) {
         throw new Error(`versions.json for ${name} has incorrect format`);
       }
-      return json.versions;
+      return json.versions.map((v: string) => [v, undefined]);
     });
   }
 

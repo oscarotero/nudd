@@ -1,4 +1,4 @@
-import { Package, parse } from "./utils.ts";
+import { Package, parse, Version } from "./utils.ts";
 import { npmVersions } from "./npm.ts";
 
 export class Skypack extends Package {
@@ -23,7 +23,7 @@ export class Skypack extends Package {
     return `https://www.skypack.dev/view/${this.name}`;
   }
 
-  async versions(): Promise<string[]> {
+  async versions(): Promise<Version[]> {
     return await npmVersions(this.name);
   }
 

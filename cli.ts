@@ -17,15 +17,13 @@ Commands:
                \tupdate the dependencies of Deno scripts installed globally
                \t${colors.dim("nudd update --global")}
 
-  duplicates   \tshow and fix duplicated dependencies
-               \t${colors.dim("nudd duplicates main.ts")}
-
   add          \tadd new dependencies to the import map file.
                \t${colors.dim("nudd add @std/path")}
 
 Optional arguments:
   -h, --help   \tshow this help text
   --dry-run    \ttest what dependencies can be updated
+  --min-age    \tminimum age of the package (in hours)
   --upgrade    \tupdate up to the latest version
   --version    \tprint the version of up`);
 }
@@ -73,6 +71,7 @@ async function upgrade() {
 
 async function main(args: string[]) {
   const a = parseArgs(args, {
+    string: ["min-age"],
     boolean: ["dry-run", "help", "version", "global"],
     alias: {
       h: "help",
@@ -97,7 +96,11 @@ async function main(args: string[]) {
   }
 
   if (command === "update") {
-    return updateCommand(rest, { dryRun: a["dry-run"], global: a.global });
+    return updateCommand(rest, {
+      dryRun: a["dry-run"],
+      global: a.global,
+      minimumAge: a["min-age"] ? parseInt(a["min-age"], 10) : undefined
+    });
   }
 
   if (command === "add") {

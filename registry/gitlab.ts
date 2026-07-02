@@ -1,4 +1,4 @@
-import { Package, readJson } from "./utils.ts";
+import { Package, readJson, Version } from "./utils.ts";
 
 export class GitlabRaw extends Package {
   static type = "gitlab";
@@ -32,12 +32,12 @@ export class GitlabRaw extends Package {
     return `https://gitlab.com/${this.name}`;
   }
 
-  async versions(): Promise<string[]> {
+  async versions(): Promise<Version[]> {
     const id = this.name.replaceAll("/", "%2F");
 
     return await readJson(
       `https://gitlab.com/api/v4/projects/${id}/repository/tags`,
-      (json) => json.map((tag: { name: string }) => tag.name),
+      (json) => json.map((tag: any) => [tag.name, tag.commit.created_at]),
     );
   }
 
