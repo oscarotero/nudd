@@ -42,7 +42,9 @@ export class Jsr extends Package {
       if (!json.versions) {
         throw new Error(`versions.json for ${this.name} has incorrect format`);
       }
-      return Object.entries(json.versions).map(([v, info]: any) => [v, info.createdAt]);
+      return Object.entries(json.versions).map((
+        [v, info]: any,
+      ) => [v, info.createdAt]);
     });
   }
 

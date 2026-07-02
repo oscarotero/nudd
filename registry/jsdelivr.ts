@@ -32,8 +32,9 @@ export class JsDelivr extends Package {
       return npmVersions(this.name);
     }
 
-    return readJson(`https://data.jsdelivr.com/v1/package/gh/${this.name}`,
-      (data) => data.versions.map((v: string) => [v, undefined])
+    return readJson(
+      `https://data.jsdelivr.com/v1/package/gh/${this.name}`,
+      (data) => data.versions.map((v: string) => [v, undefined]),
     );
   }
 

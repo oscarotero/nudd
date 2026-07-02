@@ -99,7 +99,7 @@ async function main(args: string[]) {
     return updateCommand(rest, {
       dryRun: a["dry-run"],
       global: a.global,
-      minimumAge: a["min-age"] ? parseInt(a["min-age"], 10) : undefined
+      minimumAge: a["min-age"] ? parseInt(a["min-age"], 10) : undefined,
     });
   }
 

@@ -23,7 +23,10 @@ export function parse(version: string): Version {
   return parseVersion(version);
 }
 
-export function getLatestVersion(versions: [string, string | undefined][], minimumAge?: string): string {
+export function getLatestVersion(
+  versions: [string, string | undefined][],
+  minimumAge?: string,
+): string {
   const validVersions: Version[] = [];
 
   for (const [version, age] of versions) {

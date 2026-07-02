@@ -25,9 +25,9 @@ export class NestLand extends Package {
     return await readJson(
       url,
       (json) =>
-        (json.packageUploadNames || []).map((name: string) =>
-          [name.split("@")[1], undefined]
-        ),
+        (json.packageUploadNames || []).map((
+          name: string,
+        ) => [name.split("@")[1], undefined]),
     );
   }
 

@@ -122,7 +122,12 @@ export async function update(
     return results;
   }
 
-  const updatedContent = await updateCode(content, options, results, minimumAge);
+  const updatedContent = await updateCode(
+    content,
+    options,
+    results,
+    minimumAge,
+  );
 
   if (updatedContent) {
     Deno.writeTextFileSync(filename, updatedContent);
@@ -237,7 +242,12 @@ async function updateImportMap(
 
   if (json.imports) {
     for (const [key, initUrl] of Object.entries(json.imports)) {
-      const updatedUrl = await updateImportUrl(initUrl, options, results, minimumAge);
+      const updatedUrl = await updateImportUrl(
+        initUrl,
+        options,
+        results,
+        minimumAge,
+      );
       if (updatedUrl) {
         json.imports[key] = updatedUrl;
         changed = true;
@@ -262,7 +272,12 @@ async function updateImportMap(
 
   if (json.lint?.plugins) {
     for (const [index, initUrl] of json.lint.plugins.entries()) {
-      const updatedUrl = await updateImportUrl(initUrl, options, results, minimumAge);
+      const updatedUrl = await updateImportUrl(
+        initUrl,
+        options,
+        results,
+        minimumAge,
+      );
       if (updatedUrl) {
         json.lint.plugins[index] = updatedUrl;
         changed = true;
@@ -272,7 +287,12 @@ async function updateImportMap(
 
   if (json.compilerOptions?.types) {
     for (const [index, initUrl] of json.compilerOptions?.types.entries()) {
-      const updatedUrl = await updateImportUrl(initUrl, options, results, minimumAge);
+      const updatedUrl = await updateImportUrl(
+        initUrl,
+        options,
+        results,
+        minimumAge,
+      );
       if (updatedUrl) {
         json.compilerOptions.types[index] = updatedUrl;
         changed = true;

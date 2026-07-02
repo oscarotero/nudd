@@ -16,7 +16,7 @@ export class Https extends Package {
       name: url,
       file: "",
       type: Https.type,
-    })
+    });
   }
 
   get packageUrl(): string {
