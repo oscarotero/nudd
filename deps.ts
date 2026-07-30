@@ -5,22 +5,30 @@ export { dirname } from "https://deno.land/std@0.224.0/path/dirname.ts";
 export { join } from "https://deno.land/std@0.224.0/path/posix/join.ts";
 export { Spinner } from "https://deno.land/std@0.224.0/cli/spinner.ts";
 import { parse as parseVersion } from "https://deno.land/std@0.224.0/semver/parse.ts";
-import { format } from "https://deno.land/std@0.224.0/semver/format.ts";
 import { compare } from "https://deno.land/std@0.224.0/semver/compare.ts";
 import { type SemVer } from "https://deno.land/std@0.224.0/semver/types.ts";
 
 export interface Version extends SemVer {
-  prefix?: string;
+  name: string;
 }
 
 export function parse(version: string): Version {
+  const name = version;
   if (version.startsWith("v")) {
     return {
-      prefix: "v",
-      ...parseVersion(version.slice(1)),
+      ...parse(version.slice(1)),
+      name,
     };
   }
-  return parseVersion(version);
+  if (version.match(/^\d+\.\d+$/)) {
+    version += ".0";
+  } else if (version.match(/^\d+$/)) {
+    version += ".0.0";
+  }
+  return {
+    name,
+    ...parseVersion(version),
+  };
 }
 
 export function getLatestVersion(
@@ -52,7 +60,5 @@ export function getLatestVersion(
     throw new Error(`No valid versions found: ${versions.join(", ")}`);
   }
 
-  const toString = format(latest);
-
-  return latest.prefix ? latest.prefix + toString : toString;
+  return latest.name;
 }
