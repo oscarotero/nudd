@@ -22,7 +22,10 @@ cache.set("https://jsr.io/@foo/bar/meta.json", versions);
 Deno.test("Update dependencies in code", async () => {
   await Deno.copyFile("tests/code.txt", "tests/code-tmp.txt");
 
-  await update("tests/code-tmp.txt", { dryRun: false });
+  await update("tests/code-tmp.txt", {
+    dryRun: false,
+    ignore: ["@foo/ignored"],
+  });
 
   const result = await Deno.readTextFile("tests/code-tmp.txt");
   const expected = await Deno.readTextFile("tests/code-expected.txt");

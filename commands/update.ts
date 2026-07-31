@@ -12,6 +12,9 @@ export interface UpdateOptions {
 
   /** Minimum age in hours */
   minimumAge?: number;
+
+  /** Ignored packages */
+  ignore?: string[];
 }
 
 export default async function run(files: string[], options: UpdateOptions) {
@@ -148,6 +151,10 @@ async function updateCode(
   for (const [initUrl, pkg] of packages) {
     const initVersion = pkg.version;
 
+    if (options.ignore?.includes(pkg.name)) {
+      continue;
+    }
+
     try {
       parse(initVersion);
     } catch {
@@ -187,6 +194,9 @@ async function updateImportUrl(
   for (const R of registries) {
     if (R.regexp.some((r) => r.test(initUrl))) {
       const v = R.parse(initUrl);
+      if (options.ignore?.includes(v.name)) {
+        break;
+      }
       const newVersion = await v.latestVersion(minimumAge);
 
       if (v.version !== newVersion && !options.dryRun) {

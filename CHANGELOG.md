@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.2.15] - 2026-07-31
+### Added
+- New `--ignore` argument to ignore some packages on update.
+
 ## [0.2.14] - 2026-07-30
 ### Fixed
 - Support for semantic versions without minor or patch numbers.
@@ -99,6 +103,7 @@ First version
 
 [#2]: https://github.com/oscarotero/nudd/issues/2
 
+[0.2.15]: https://github.com/oscarotero/nudd/compare/v0.2.14...v0.2.15
 [0.2.14]: https://github.com/oscarotero/nudd/compare/v0.2.13...v0.2.14
 [0.2.13]: https://github.com/oscarotero/nudd/compare/v0.2.12...v0.2.13
 [0.2.12]: https://github.com/oscarotero/nudd/compare/v0.2.11...v0.2.12

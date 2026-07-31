@@ -24,6 +24,7 @@ Optional arguments:
   -h, --help   \tshow this help text
   --dry-run    \ttest what dependencies can be updated
   --min-age    \tminimum age of the package (in hours)
+  --ignore     \tcomma-separated list of ignored packages
   --upgrade    \tupdate up to the latest version
   --version    \tprint the version of up`);
 }
@@ -71,7 +72,7 @@ async function upgrade() {
 
 async function main(args: string[]) {
   const a = parseArgs(args, {
-    string: ["min-age"],
+    string: ["min-age", "ignore"],
     boolean: ["dry-run", "help", "version", "global"],
     alias: {
       h: "help",
@@ -100,6 +101,7 @@ async function main(args: string[]) {
       dryRun: a["dry-run"],
       global: a.global,
       minimumAge: a["min-age"] ? parseInt(a["min-age"], 10) : undefined,
+      ignore: a.ignore?.split(",").map((v) => v.trim()).filter(Boolean),
     });
   }
 
