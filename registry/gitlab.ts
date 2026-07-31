@@ -37,6 +37,7 @@ export class GitlabRaw extends Package {
 
     return await readJson(
       `https://gitlab.com/api/v4/projects/${id}/repository/tags`,
+      // deno-lint-ignore no-explicit-any
       (json) => json.map((tag: any) => [tag.name, tag.commit.created_at]),
     );
   }

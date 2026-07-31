@@ -9,5 +9,10 @@
     "exclude": [
       "CHANGELOG.md"
     ]
+  },
+  "lint": {
+    "rules": {
+      "exclude": [ "no-import-prefix"]
+    }
   }
 }

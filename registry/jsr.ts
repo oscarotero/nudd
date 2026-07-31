@@ -43,6 +43,7 @@ export class Jsr extends Package {
         throw new Error(`versions.json for ${this.name} has incorrect format`);
       }
       return Object.entries(json.versions).map((
+        // deno-lint-ignore no-explicit-any
         [v, info]: any,
       ) => [v, info.createdAt]);
     });
